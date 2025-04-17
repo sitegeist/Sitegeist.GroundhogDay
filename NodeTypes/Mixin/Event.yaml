@@ -1,0 +1,19 @@
+'Sitegeist.GroundhogDay:Mixin.Event':
+  abstract: true
+  ui:
+    group: 'event'
+    icon: 'calendar-day'
+    label: i18n
+    inspector:
+      groups:
+        event:
+          label: i18n
+  properties:
+    recurrenceRule:
+      type: Recurr\Rule
+      ui:
+        reloadIfChanged: true
+        label: i18n
+        inspector:
+          group: event
+          editor: 'Neos.Neos/Inspector/Editors/TextFieldEditor'

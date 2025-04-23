@@ -3,5 +3,4 @@ Neos:
     userInterface:
       translation:
         autoInclude:
-          Sitegeist.GroundhogDay:
-            - 'Event'
+          'Sitegeist.GroundhogDay': ['NodeTypes/*']

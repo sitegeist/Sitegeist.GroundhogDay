@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-    <file original="NodeTypes.Mixin.Event" product-name="Sitegeist.GroundhogDay" source-language="en" datatype="plaintext">
+    <file original="NodeTypes/Mixin/Event" product-name="Sitegeist.GroundhogDay" source-language="en" datatype="plaintext" target-language="de">
         <body>
             <trans-unit id="groups.event" xml:space="preserve" approved="yes">
                 <source>Event</source>
+                <target state="translated">Veranstaltung</target>
             </trans-unit>
             <trans-unit id="properties.recurrenceRule" xml:space="preserve" approved="yes">
                 <source>Recurrence rule</source>
+                <target state="translated">Wiederholungsregel</target>
             </trans-unit>
         </body>
     </file>

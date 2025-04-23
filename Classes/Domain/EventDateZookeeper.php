@@ -17,13 +17,13 @@ final class EventDateZookeeper
 {
     public function whenRecurrenceRuleWasChanged(RecurrenceRuleWasChanged $event): void
     {
-        \Neos\Flow\var_dump($event);
-        exit();
+        #\Neos\Flow\var_dump($event);
+        #exit();
     }
 
     public function whenTimeHasPassed(TimeHasPassed $event): void
     {
-        \Neos\Flow\var_dump($event);
-        exit();
+        #\Neos\Flow\var_dump($event);
+        #exit();
     }
 }

@@ -1,7 +1,6 @@
 'Sitegeist.GroundhogDay:Mixin.Event':
   abstract: true
   ui:
-    group: 'event'
     icon: 'calendar-day'
     label: i18n
     inspector:

@@ -9,7 +9,7 @@
           label: i18n
   properties:
     recurrenceRule:
-      type: Recurr\Rule
+      type: Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule
       ui:
         reloadIfChanged: true
         label: i18n

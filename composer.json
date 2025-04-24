@@ -26,7 +26,14 @@
     "scripts": {
         "lint": "bin/phpcs --standard=PSR12 --extensions=php --exclude=Generic.Files.LineLength Classes/ Tests/",
         "analyse": "bin/phpstan analyse --level 9 Tests/Unit Classes",
-        "test": "bin/phpunit -c phpunit.xml --enforce-time-limit --coverage-html Build/Reports/coverage Tests"
+        "test:unit": "bin/phpunit -c phpunit.xml --enforce-time-limit --coverage-html Build/Reports/coverage Tests",
+        "test:functional": [
+            "FLOW_CONTEXT=Testing bin/phpunit --colors --stop-on-failure -c Build/BuildEssentials/PhpUnit/FunctionalTests.xml Tests/Functional"
+        ],
+        "test": [
+            "@test:unit",
+            "@test:functional"
+        ]
     },
     "config": {
         "vendor-dir": "Packages/Libraries",

@@ -8,7 +8,7 @@ use Neos\ContentRepository\Domain\Model\Node;
 use Neos\Flow\Annotations as Flow;
 use Sitegeist\GroundhogDay\Domain\EventDateZookeeper;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
-use Sitegeist\GroundhogDay\Domain\RecurrenceRuleWasChanged;
+use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
 
 /**
  * The event relay infrastructure service

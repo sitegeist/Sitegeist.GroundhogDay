@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sitegeist\GroundhogDay\Domain;
 
 use Neos\Flow\Annotations as Flow;
+use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
 
 /**
  * The event date zookeeper, implementing the policy that whenever
@@ -15,10 +16,18 @@ use Neos\Flow\Annotations as Flow;
 #[Flow\Scope('singleton')]
 final class EventDateZookeeper
 {
+    public function __construct(
+        private readonly EventDateRepository $eventDateRepository,
+    ) {
+    }
+
     public function whenRecurrenceRuleWasChanged(RecurrenceRuleWasChanged $event): void
     {
-        #\Neos\Flow\var_dump($event);
-        #exit();
+        if ($event->eventId === null) {
+            $this->eventDateRepository->removeAllFutureEventDatesByEventId($event->eventId, $event->dateOfChange);
+        } else {
+            $this->eventDateRepository->replaceAllFutureEventDatesByEventId($event->eventId, $event->changedRule, $event->dateOfChange);
+        }
     }
 
     public function whenTimeHasPassed(TimeHasPassed $event): void

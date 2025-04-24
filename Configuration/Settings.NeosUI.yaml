@@ -4,3 +4,13 @@ Neos:
       translation:
         autoInclude:
           'Sitegeist.GroundhogDay': ['NodeTypes/*']
+      inspector:
+        dataTypes:
+          'Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule':
+            defaultValue: null
+            editor: 'Sitegeist.Groundhogday/Inspector/Editors/RRuleEditor'
+    Ui:
+      resources:
+        javascript:
+          '@sitegeist/groundhogday-plugin':
+            resource: 'resource://Sitegeist.GroundhogDay/Public/JavaScript/Plugin.js'

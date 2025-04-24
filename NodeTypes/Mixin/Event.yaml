@@ -16,3 +16,10 @@
         inspector:
           group: event
           editor: 'Neos.Neos/Inspector/Editors/TextFieldEditor'
+    recurrenceRuleFancyEdfitor:
+      type: Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule
+      ui:
+        reloadIfChanged: true
+        label: 'RRule Fancy Editor'
+        inspector:
+          group: event

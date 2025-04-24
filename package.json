@@ -1,0 +1,21 @@
+{
+    "name": "@sitegeist/groundhogday",
+    "license": "MIT",
+    "private": true,
+    "workspaces": [
+        "Neos.Ui/*"
+    ],
+    "scripts": {
+        "build": "yarn workspaces foreach -v run build",
+        "watch": "yarn workspaces foreach -v run watch"
+    },
+    "devDependencies": {
+        "@neos-project/neos-ui-extensibility": "^7.0.2",
+        "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+        "@types/react": "^18.2.60",
+        "@types/react-dom": "^18.2.19",
+        "@types/styled-components": "^5.1.9",
+        "prettier": "^3.2.5",
+        "typescript": "^4.2.4"
+    }
+}

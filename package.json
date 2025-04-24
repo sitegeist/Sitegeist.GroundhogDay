@@ -6,16 +6,17 @@
         "Neos.Ui/*"
     ],
     "scripts": {
-        "build": "yarn workspaces foreach -v run build",
-        "watch": "yarn workspaces foreach -v run watch"
+        "build": "yarn workspace @sitegeist/groundhogday-plugin run build",
+        "watch": "yarn workspace @sitegeist/groundhogday-plugin run watch"
     },
     "devDependencies": {
-        "@neos-project/neos-ui-extensibility": "^7.0.2",
-        "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-        "@types/react": "^18.2.60",
-        "@types/react-dom": "^18.2.19",
+        "@types/react": "^17.0.3",
+        "@types/react-dom": "^17.0.3",
         "@types/styled-components": "^5.1.9",
+        "esbuild": "~0.25.0",
         "prettier": "^3.2.5",
+        "tsx": "^4.19.3",
         "typescript": "^4.2.4"
-    }
+    },
+    "packageManager": "yarn@3.2.0"
 }

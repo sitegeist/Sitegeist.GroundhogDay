@@ -1,5 +1,6 @@
 import { SynchronousRegistry } from '@neos-project/neos-ui-extensibility'
 import * as React from 'react'
+import { TestComponent } from './components/test'
 
 export function registerRRulEditor(globalRegistry: any): void {
     const inspectorRegistry = globalRegistry.get('inspector')
@@ -17,6 +18,6 @@ export function registerRRulEditor(globalRegistry: any): void {
     }
 
     editorsRegistry.set('Sitegeist.Groundhogday/Inspector/Editors/RRuleEditor', {
-        component: () => <div>RRule Editor: hello world!!!</div>,
+        component: () => <TestComponent />,
     })
 }

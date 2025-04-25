@@ -6,8 +6,8 @@ namespace Sitegeist\GroundhogDay\Infrastructure;
 
 use Neos\Flow\Property\PropertyMappingConfigurationInterface;
 use Neos\Flow\Property\TypeConverter\AbstractTypeConverter;
-use Recurr\Exception\InvalidRRule;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
+use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleIsInvalid;
 
 class StringToRecurrenceRuleConverter extends AbstractTypeConverter
 {
@@ -43,7 +43,7 @@ class StringToRecurrenceRuleConverter extends AbstractTypeConverter
     ) {
         try {
             return RecurrenceRule::fromString($source);
-        } catch (InvalidRRule) {
+        } catch (RecurrenceRuleIsInvalid) {
             return null;
         }
     }

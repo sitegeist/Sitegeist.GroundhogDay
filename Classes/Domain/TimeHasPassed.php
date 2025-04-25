@@ -9,7 +9,7 @@ use Neos\Flow\Annotations as Flow;
 /**
  * The event describing the passage of time
  *
- * To be emitted e.g. by command controllers via cronjob and to be consumed by the @see EventDateZookeeper
+ * To be emitted e.g. by command controllers via cronjob and to be consumed by the @see EventOccurrenceZookeeper
  */
 #[Flow\Proxy(false)]
 final readonly class TimeHasPassed

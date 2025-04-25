@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Sitegeist\GroundhogDay\Command;
 
 use Neos\Flow\Cli\CommandController;
-use Sitegeist\GroundhogDay\Domain\EventDateZookeeper;
+use Sitegeist\GroundhogDay\Domain\EventOccurrenceZookeeper;
 use Sitegeist\GroundhogDay\Domain\TimeHasPassed;
 
 final class EventDateCommandController extends CommandController
 {
     public function __construct(
-        private readonly EventDateZookeeper $eventDateZookeeper,
+        private readonly EventOccurrenceZookeeper $eventDateZookeeper,
     ) {
         parent::__construct();
     }

@@ -14,19 +14,19 @@ use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
  * the event dates are to be updated
  */
 #[Flow\Scope('singleton')]
-final class EventDateZookeeper
+final class EventOccurrenceZookeeper
 {
     public function __construct(
-        private readonly EventDateRepository $eventDateRepository,
+        private readonly EventOccurrenceRepository $eventDateRepository,
     ) {
     }
 
     public function whenRecurrenceRuleWasChanged(RecurrenceRuleWasChanged $event): void
     {
-        if ($event->eventId === null) {
-            $this->eventDateRepository->removeAllFutureEventDatesByEventId($event->eventId, $event->dateOfChange);
+        if ($event->changedRule === null) {
+            $this->eventDateRepository->removeAllFutureRecurrencesByEventId($event->eventId, $event->dateOfChange);
         } else {
-            $this->eventDateRepository->replaceAllFutureEventDatesByEventId($event->eventId, $event->changedRule, $event->dateOfChange);
+            $this->eventDateRepository->replaceAllFutureRecurrencesByEventId($event->eventId, $event->changedRule, $event->dateOfChange);
         }
     }
 

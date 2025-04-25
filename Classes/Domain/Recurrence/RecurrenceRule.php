@@ -12,14 +12,15 @@ use Recurr\Rule;
 final readonly class RecurrenceRule implements \JsonSerializable, \Stringable
 {
     private function __construct(
-        public Rule $value,
+        public string $value,
     ) {
     }
 
     public static function fromString(string $value): self
     {
         try {
-            return new self(new Rule($value));
+            new Rule($value); // just for validation
+            return new self($value);
         } catch (InvalidRRule) {
             throw RecurrenceRuleIsInvalid::butWasTriedToBeUsedAsSuch($value);
         }
@@ -27,12 +28,12 @@ final readonly class RecurrenceRule implements \JsonSerializable, \Stringable
 
     public function jsonSerialize(): string
     {
-        return $this->value->getString();
+        return $this->value;
     }
 
     public function toString(): string
     {
-        return $this->value->getString();
+        return $this->value;
     }
 
     public function __toString(): string

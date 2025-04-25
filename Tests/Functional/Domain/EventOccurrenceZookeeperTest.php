@@ -8,13 +8,13 @@ use Neos\ContentRepository\Domain\NodeAggregate\NodeAggregateIdentifier;
 use Neos\Flow\Persistence\Doctrine\Service as DoctrineService;
 use Neos\Flow\Tests\FunctionalTestCase;
 use PHPUnit\Framework\Assert;
-use Sitegeist\GroundhogDay\Domain\EventDate;
-use Sitegeist\GroundhogDay\Domain\EventDateRepository;
-use Sitegeist\GroundhogDay\Domain\EventDateZookeeper;
+use Sitegeist\GroundhogDay\Domain\EventOccurrence;
+use Sitegeist\GroundhogDay\Domain\EventOccurrenceRepository;
+use Sitegeist\GroundhogDay\Domain\EventOccurrenceZookeeper;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
 
-final class EventDateZookeeperTest extends FunctionalTestCase
+final class EventOccurrenceZookeeperTest extends FunctionalTestCase
 {
     protected static $testablePersistenceEnabled = true;
 
@@ -26,14 +26,14 @@ final class EventDateZookeeperTest extends FunctionalTestCase
 
     /**
      * @param iterable<RecurrenceRuleWasChanged> $previousEvents
-     * @param list<array{startDate: \DateTimeImmutable, endDate: \DateTimeImmutable, eventDates: list<EventDate>}> $expectedEventDatesWithinPeriod
-     * @param list<array{eventId: NodeAggregateIdentifier, eventDates: list<EventDate>}> $expectedEventDatesByEventId
+     * @param list<array{startDate: \DateTimeImmutable, endDate: \DateTimeImmutable, eventDates: list<EventOccurrence>}> $expectedEventDatesWithinPeriod
+     * @param list<array{eventId: NodeAggregateIdentifier, eventDates: list<EventOccurrence>}> $expectedEventDatesByEventId
      * @dataProvider recurrenceRuleChangeProvider
      */
     public function testWhenRecurrenceRuleWasChanged(array $previousEvents, RecurrenceRuleWasChanged $event, array $expectedEventDatesWithinPeriod, array $expectedEventDatesByEventId): void
     {
-        $writeSubject = $this->objectManager->get(EventDateZookeeper::class);
-        $readSubject = $this->objectManager->get(EventDateRepository::class);
+        $writeSubject = $this->objectManager->get(EventOccurrenceZookeeper::class);
+        $readSubject = $this->objectManager->get(EventOccurrenceRepository::class);
         foreach ($previousEvents as $previousEvent) {
             $writeSubject->whenRecurrenceRuleWasChanged($previousEvent);
         }
@@ -41,7 +41,7 @@ final class EventDateZookeeperTest extends FunctionalTestCase
         $writeSubject->whenRecurrenceRuleWasChanged($event);
 
         foreach ($expectedEventDatesWithinPeriod as $testRecord) {
-            Assert::assertEquals($testRecord['eventDates'], iterator_to_array($readSubject->findEventDatesWithinPeriod($testRecord['startDate'], $testRecord['endDate'])));
+            Assert::assertEquals($testRecord['eventDates'], iterator_to_array($readSubject->findEventOccurrencesWithinPeriod($testRecord['startDate'], $testRecord['endDate'])));
         }
 
         foreach ($expectedEventDatesByEventId as $testRecord) {
@@ -53,8 +53,8 @@ final class EventDateZookeeperTest extends FunctionalTestCase
      * @return iterable<string,array{
      *     previousEvents: array<RecurrenceRuleWasChanged>,
      *     event: RecurrenceRuleWasChanged,
-     *     expectedEventDatesWithinPeriod: list<array{startDate: \DateTimeImmutable, endDate: \DateTimeImmutable, eventDates: list<EventDate>}>,
-     *     expectedEventDatesByEventId: list<array{eventId: NodeAggregateIdentifier, eventDates: list<EventDate>}>
+     *     expectedEventDatesWithinPeriod: list<array{startDate: \DateTimeImmutable, endDate: \DateTimeImmutable, eventDates: list<EventOccurrence>}>,
+     *     expectedEventDatesByEventId: list<array{eventId: NodeAggregateIdentifier, eventDates: list<EventOccurrence>}>
      * }>
      *
      * @todo same event multiple times on a single day
@@ -81,10 +81,10 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
                     'startDate' => self::createDateTime('2025-04-18', false),
                     'endDate' => self::createDateTime('2025-04-24', true),
                     'eventDates' => [
-                        new EventDate(
+                        EventOccurrence::create(
                             NodeAggregateIdentifier::fromString('my-event'),
                             self::createDateTime('2025-04-24', false),
-                            1,
+                            self::createDateTime('2025-04-24', false),
                         )
                     ]
                 ],
@@ -92,15 +92,15 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
                     'startDate' => self::createDateTime('2025-04-18', false),
                     'endDate' => self::createDateTime('2025-05-08', true),
                     'eventDates' => [
-                        new EventDate(
+                        EventOccurrence::create(
                             NodeAggregateIdentifier::fromString('my-event'),
                             self::createDateTime('2025-04-24', false),
-                            1,
+                            self::createDateTime('2025-04-24', false),
                         ),
-                        new EventDate(
+                        EventOccurrence::create(
                             NodeAggregateIdentifier::fromString('my-event'),
                             self::createDateTime('2025-05-04', false),
-                            1,
+                            self::createDateTime('2025-05-04', false),
                         )
                     ]
                 ],
@@ -108,10 +108,10 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
                     'startDate' => self::createDateTime('2025-05-25', false),
                     'endDate' => self::createDateTime('2025-06-03', true),
                     'eventDates' => [
-                        new EventDate(
+                        EventOccurrence::create(
                             NodeAggregateIdentifier::fromString('my-event'),
                             self::createDateTime('2025-06-03', false),
-                            1,
+                            self::createDateTime('2025-06-03', false),
                         )
                     ]
                 ],
@@ -120,30 +120,30 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
                 [
                     'eventId' => NodeAggregateIdentifier::fromString('my-event'),
                     'eventDates' => [
-                        new EventDate(
+                        EventOccurrence::create(
                             NodeAggregateIdentifier::fromString('my-event'),
                             self::createDateTime('2025-04-24', false),
-                            1,
+                            self::createDateTime('2025-04-24', false),
                         ),
-                        new EventDate(
+                        EventOccurrence::create(
                             NodeAggregateIdentifier::fromString('my-event'),
                             self::createDateTime('2025-05-04', false),
-                            1,
+                            self::createDateTime('2025-05-04', false),
                         ),
-                        new EventDate(
+                        EventOccurrence::create(
                             NodeAggregateIdentifier::fromString('my-event'),
                             self::createDateTime('2025-05-14', false),
-                            1,
+                            self::createDateTime('2025-05-14', false),
                         ),
-                        new EventDate(
+                        EventOccurrence::create(
                             NodeAggregateIdentifier::fromString('my-event'),
                             self::createDateTime('2025-05-24', false),
-                            1,
+                            self::createDateTime('2025-05-24', false),
                         ),
-                        new EventDate(
+                        EventOccurrence::create(
                             NodeAggregateIdentifier::fromString('my-event'),
                             self::createDateTime('2025-06-03', false),
-                            1,
+                            self::createDateTime('2025-06-03', false),
                         ),
                     ]
                 ]

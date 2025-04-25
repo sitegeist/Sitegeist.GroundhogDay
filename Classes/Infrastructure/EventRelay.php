@@ -6,7 +6,7 @@ namespace Sitegeist\GroundhogDay\Infrastructure;
 
 use Neos\ContentRepository\Domain\Model\Node;
 use Neos\Flow\Annotations as Flow;
-use Sitegeist\GroundhogDay\Domain\EventDateZookeeper;
+use Sitegeist\GroundhogDay\Domain\EventOccurrenceZookeeper;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
 
@@ -19,7 +19,7 @@ use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
 class EventRelay
 {
     public function __construct(
-        private readonly EventDateZookeeper $eventDateZookeeper,
+        private readonly EventOccurrenceZookeeper $eventOccurrenceZookeeper,
     ) {
     }
 
@@ -34,9 +34,10 @@ class EventRelay
             $newComparisonValue = $newValue instanceof RecurrenceRule ? $newValue->toString() : null;
 
             if ($oldComparisonValue !== $newComparisonValue) {
-                $this->eventDateZookeeper->whenRecurrenceRuleWasChanged(new RecurrenceRuleWasChanged(
+                $this->eventOccurrenceZookeeper->whenRecurrenceRuleWasChanged(new RecurrenceRuleWasChanged(
                     $node->getNodeAggregateIdentifier(),
-                    $newValue
+                    $newValue,
+                    new \DateTimeImmutable(),
                 ));
             }
         }

@@ -6,7 +6,7 @@ const isWatch = process.argv.includes('--watch');
 const options = {
     logLevel: "info",
     bundle: true,
-    minify: !isWatch,
+    minify: true,
     sourcemap: "linked",
     legalComments: "linked",
     target: "es2020",

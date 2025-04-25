@@ -72,6 +72,23 @@ final class EventOccurrenceRepository
         }
     }
 
+    public function findFutureEventOccurrencesByEventId(NodeAggregateIdentifier $eventId, \DateTimeImmutable $referenceDate): iterable
+    {
+        /** @var array<int,DatabaseRow> $rows */
+        $rows = $this->databaseConnection->executeQuery(
+            'SELECT * FROM ' . self::TABLE_NAME
+            . ' WHERE event_id = :eventId AND start_date > :referenceDate',
+            [
+                'eventId' => (string)$eventId,
+                'referenceDate' => $referenceDate->format(self::DATE_FORMAT),
+            ]
+        )->fetchAllAssociative();
+
+        foreach ($rows as $row) {
+            yield $this->mapDatabaseRowToEventOccurrence($row);
+        }
+    }
+
     public function removeAllFutureRecurrencesByEventId(NodeAggregateIdentifier $eventId, \DateTimeImmutable $referenceDate): void
     {
         $this->databaseConnection->executeStatement(

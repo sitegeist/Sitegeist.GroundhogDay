@@ -72,19 +72,19 @@ final class EventOccurrenceRepository
         }
     }
 
-    public function removeAllFutureRecurrencesByEventId(NodeAggregateIdentifier $eventId, \DateTimeImmutable $now): void
+    public function removeAllFutureRecurrencesByEventId(NodeAggregateIdentifier $eventId, \DateTimeImmutable $referenceDate): void
     {
         $this->databaseConnection->executeStatement(
-            'DELETE FROM ' . self::TABLE_NAME . ' WHERE event_id = :eventId AND end_date > :now AND source = :source',
+            'DELETE FROM ' . self::TABLE_NAME . ' WHERE event_id = :eventId AND end_date > :referenceDate AND source = :source',
             [
                 'eventId' => (string)$eventId,
-                'now' => $now->format(self::DATE_FORMAT),
+                'referenceDate' => $referenceDate->format(self::DATE_FORMAT),
                 'source' => EventOccurrenceSource::SOURCE_RECURRENCE_RULE->value,
             ]
         );
     }
 
-    public function replaceAllFutureRecurrencesByEventId(NodeAggregateIdentifier $eventId, RecurrenceRule $recurrenceRule, \DateTimeImmutable $now): void
+    public function replaceAllFutureRecurrencesByEventId(NodeAggregateIdentifier $eventId, RecurrenceRule $recurrenceRule, \DateTimeImmutable $referenceDate): void
     {
         $renderer = new ArrayTransformer();
         /** @var list<EventOccurrence> $futureDates */
@@ -95,19 +95,19 @@ final class EventOccurrenceRepository
             $renderer->transform(
                 $rule,
                 /** @todo make configurable */
-                $rule->getEndDate() ? null : new BeforeConstraint($now->add(new \DateInterval('P1Y')))
+                $rule->getEndDate() ? null : new BeforeConstraint($referenceDate->add(new \DateInterval('P1Y')))
             ) as $recurrence
         ) {
             $occurrence = EventOccurrence::tryFromRecurrence($eventId, $recurrence);
-            if (!$occurrence instanceof EventOccurrence) {
+            if (!$occurrence instanceof EventOccurrence || $occurrence->startDate < $referenceDate) {
                 continue;
             }
 
             $futureDates[] = $occurrence;
         }
 
-        $this->databaseConnection->transactional(function () use ($eventId, $now, $futureDates) {
-            $this->removeAllFutureRecurrencesByEventId($eventId, $now);
+        $this->databaseConnection->transactional(function () use ($eventId, $referenceDate, $futureDates) {
+            $this->removeAllFutureRecurrencesByEventId($eventId, $referenceDate);
 
             foreach ($futureDates as $futureDate) {
                 $this->databaseConnection->insert(

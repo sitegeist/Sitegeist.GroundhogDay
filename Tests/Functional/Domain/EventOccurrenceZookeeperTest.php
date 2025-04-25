@@ -54,7 +54,7 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
 
         foreach ($expectedEventDatesByEventId as $testRecord) {
             $expected = $testRecord['eventDates'];
-            $actual = iterator_to_array($readSubject->findEventDatesByEventId($testRecord['eventId']));
+            $actual = iterator_to_array($readSubject->findEventOccurrencesByEventId($testRecord['eventId']));
             Assert::assertEquals(
                 $expected,
                 $actual,

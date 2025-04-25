@@ -56,7 +56,7 @@ final class EventOccurrenceRepository
     /**
      * @return iterable<int,EventOccurrence>
      */
-    public function findEventDatesByEventId(NodeAggregateIdentifier $eventId): iterable
+    public function findEventOccurrencesByEventId(NodeAggregateIdentifier $eventId): iterable
     {
         /** @var array<int,DatabaseRow> $rows */
         $rows = $this->databaseConnection->executeQuery(

@@ -72,6 +72,9 @@ final class EventOccurrenceRepository
         }
     }
 
+    /**
+     * @return iterable<int,EventOccurrence>
+     */
     public function findFutureEventOccurrencesByEventId(NodeAggregateIdentifier $eventId, \DateTimeImmutable $referenceDate): iterable
     {
         /** @var array<int,DatabaseRow> $rows */

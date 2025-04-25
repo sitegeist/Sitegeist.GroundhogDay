@@ -26,10 +26,6 @@ enum DayOfWeek: string
             '4' => self::DAY_THURSDAY,
             '5' => self::DAY_FRIDAY,
             '6' => self::DAY_SATURDAY,
-            default => throw new \DomainException(
-                'Given date has no valid day of week, "' . $date->format('w') . '" given.',
-                1745595645
-            )
         };
     }
 }

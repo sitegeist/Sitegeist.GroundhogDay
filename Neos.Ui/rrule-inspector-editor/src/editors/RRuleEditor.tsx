@@ -15,7 +15,13 @@ export const RRuleEditor: React.FC<RRuleEditorProps<string>> = ({ value, commit 
     const [activeTab, setActiveTab] = useState('start')
 
     const handleRRuleChange = (updatedRule: RRule) => {
-        setRRule(updatedRule)
+        setRRule(new RRule({
+            ...updatedRule.options,
+            byhour: undefined,
+            byminute: undefined,
+            bysecond: undefined,
+            wkst: undefined
+        }))
         commit(updatedRule.toString())
     }
 

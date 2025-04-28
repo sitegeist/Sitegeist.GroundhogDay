@@ -1,18 +1,17 @@
 import React from 'react'
 import { useState } from 'react';
 import { RRule } from 'rrule';
-import { MonthFrequencyType, TabContentProps } from '../types';
+import { TabContentProps, YearlyFrequencyType } from '../types';
 import { Counter } from './counter';
 import { Container } from './container';
 import { Tabs } from '@neos-project/react-ui-components';
 import MonthdaySelector from './monthDaySelector';
-import { getInitialMonthFrequencyType } from '../utils/getInitialMonthFrequencyType';
 import SetPosSelector from './setPosSelector';
-import { updateRRuleMonthFrequencyOptions } from '../utils/updateRRuleMonthFrequencyOptions';
+import MonthSelector from './monthSelector';
 
 
-export const MonthFrequencyEditor: React.FC<TabContentProps> = ({ rrule, onChange }) => {
-    const [freqMonthType, setFreqMonthType] = useState<MonthFrequencyType>(getInitialMonthFrequencyType(rrule));
+export const YearlyFreqEditor: React.FC<TabContentProps> = ({ rrule, onChange }) => {
+    const [yearlyFreqType, setyearlyFreqType] = useState<YearlyFrequencyType>();
 
     const handleIntervalChange = (interval: number) => {
         const updatedRRule = new RRule({
@@ -28,14 +27,13 @@ export const MonthFrequencyEditor: React.FC<TabContentProps> = ({ rrule, onChang
                 prefix="Every"
                 value={rrule.options.interval ?? 1}
                 onChange={handleIntervalChange}
-                suffix="Month(s)"
+                suffix="Year(s)"
             />
 
             <Tabs  
-                activeTab={freqMonthType}
-                onActiveTabChange={(type: MonthFrequencyType) => {
-                    setFreqMonthType(type)
-                    onChange(updateRRuleMonthFrequencyOptions(rrule, type))
+                activeTab={yearlyFreqType}
+                onActiveTabChange={(type: YearlyFrequencyType) => {
+                    setyearlyFreqType(type)
                 }}
                 theme={{
                     'tabNavigation__item': 'tabs-nav-item-month-freq',
@@ -44,16 +42,22 @@ export const MonthFrequencyEditor: React.FC<TabContentProps> = ({ rrule, onChang
                 }}
             >
                 <Tabs.Panel
-                    title="By Day(s)"
-                    id="bymonthday"
+                    title="By Month(s)"
+                    id="bymonths"
                 >
-                    <MonthdaySelector rrule={rrule} onChange={onChange} />
+                    <Container>
+                        <MonthSelector rrule={rrule} onChange={onChange} />
+                        <MonthdaySelector rrule={rrule} onChange={onChange} />
+                    </Container>
                 </Tabs.Panel>
                 <Tabs.Panel
                     title="On nth Day"
                     id="bysetpos"
                 >
-                    <SetPosSelector rrule={rrule} onChange={onChange} />
+                    <Container>
+                        <SetPosSelector rrule={rrule} onChange={onChange} />
+                        <MonthSelector rrule={rrule} onChange={onChange} />
+                    </Container>
                 </Tabs.Panel>
             </Tabs>
         </Container>

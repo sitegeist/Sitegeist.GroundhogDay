@@ -42,4 +42,12 @@ export interface TabContentProps {
 
 export type RRuleEndType = 'until' | 'count' | 'never';
 
-export type MonthFrequencyType = 'bymonthday' | 'bysetpos';
+export enum MonthFrequencyType {
+    BYMONTHDAY = 'bymonthday',
+    BYSETPOS = 'bysetpos',
+}
+
+export enum YearlyFrequencyType {
+    BYMONTHS = 'bymonths',
+    BYSETPOS = 'bysetpos',
+}

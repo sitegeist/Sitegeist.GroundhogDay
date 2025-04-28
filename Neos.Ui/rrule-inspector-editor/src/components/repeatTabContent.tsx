@@ -2,8 +2,11 @@ import React from 'react'
 import { Frequency, RRule } from 'rrule'
 import { TabContentProps } from '../types'
 import { SelectBox } from '@neos-project/react-ui-components'
-import { REPEAT_TYPE_OPTIONS } from '../utils/constants'
+import { FREQ_TYPE_OPTIONS } from '../utils/constants'
 import { Counter } from './counter'
+import WeekdaySelector from './weekdaySelector'
+import { Container } from './container'
+import { MonthFrequencyEditor } from './monthFrequencyEditor'
 
 export const RepeatTabContent: React.FC<TabContentProps> = ({ rrule, onChange }) => {
     const handleIntervalChange = (newInterval: number) => {
@@ -17,35 +20,55 @@ export const RepeatTabContent: React.FC<TabContentProps> = ({ rrule, onChange })
     const handleFrequencyTypeChange = (frequency: Frequency) => {
         const updatedRRule = new RRule({
             ...rrule.options,
-            freq: frequency
+            freq: frequency,
+            byweekday: null,
+            interval: undefined
         })
         onChange(updatedRRule)
     }
 
     return (
-        <>
+        <Container>
             <SelectBox
                 value={rrule.options.freq}
-                options={REPEAT_TYPE_OPTIONS}
+                options={FREQ_TYPE_OPTIONS}
                 onValueChange={handleFrequencyTypeChange}
             />
 
-            {(
-                rrule.options.freq == Frequency.HOURLY || 
-                rrule.options.freq == Frequency.DAILY ||
-                rrule.options.freq == Frequency.WEEKLY
-            ) &&
+            {rrule.options.freq == Frequency.HOURLY &&
                 <Counter
+                    prefix={'Every'}
                     value={rrule.options.interval ?? 0}
                     onChange={handleIntervalChange}
+                    suffix={'Hour(s)'}
                 />
+            }
+
+            {rrule.options.freq == Frequency.DAILY &&
+                <Counter
+                    prefix={'Every'}
+                    value={rrule.options.interval ?? 0}
+                    onChange={handleIntervalChange}
+                    suffix={'Day(s)'}
+                />
+            }
+
+            {rrule.options.freq == Frequency.WEEKLY &&
+                <Counter
+                    prefix={'Every'}
+                    value={rrule.options.interval ?? 0}
+                    onChange={handleIntervalChange}
+                    suffix={'Week(s)'}
+                />
+            }
+
+            {rrule.options.freq == Frequency.MONTHLY &&
+                <MonthFrequencyEditor rrule={rrule} onChange={onChange} />
             }
             
             {rrule.options.freq == Frequency.WEEKLY &&
-                <div>
-
-                </div>
+                <WeekdaySelector rrule={rrule} onChange={onChange} />
             }
-        </>        
+        </Container>        
     )
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Container } from '../components/container'
+import { EditorContainer } from '../components/container'
 import { RRuleEditorProps, RRuleEndType, TabId } from '../types'
 import { RRule } from 'rrule'
 import { Tabs } from '@neos-project/react-ui-components'
@@ -12,7 +12,7 @@ export const RRuleEditor: React.FC<RRuleEditorProps<string>> = ({ value, commit 
     const externalValue: RRule = useExternalRRule(value)
 
     const [rrule, setRRule] = useState<RRule>(externalValue)
-    const [activeTab, setActiveTab] = useState('repeat')
+    const [activeTab, setActiveTab] = useState('start')
 
     const handleRRuleChange = (updatedRule: RRule) => {
         setRRule(updatedRule)
@@ -24,7 +24,7 @@ export const RRuleEditor: React.FC<RRuleEditorProps<string>> = ({ value, commit 
     }, [rrule])
 
     return (
-        <Container>
+        <EditorContainer>
             <Tabs  
                 activeTab={activeTab}
                 onActiveTabChange={(id: RRuleEndType) => setActiveTab(id)}
@@ -62,6 +62,6 @@ export const RRuleEditor: React.FC<RRuleEditorProps<string>> = ({ value, commit 
                     />
                 </Tabs.Panel>
             </Tabs>
-        </Container>
+        </EditorContainer>
     )
 }

@@ -1,10 +1,10 @@
 import styled from 'styled-components'
 
-export const Container = styled.div`
+export const EditorContainer = styled.div`
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     margin-top: 8px;
 
     .tabs-nav-item {
@@ -34,4 +34,11 @@ export const Container = styled.div`
     .select-tdy-btn {
         display: none;
     }
+`
+
+export const Container = styled.div`
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 `

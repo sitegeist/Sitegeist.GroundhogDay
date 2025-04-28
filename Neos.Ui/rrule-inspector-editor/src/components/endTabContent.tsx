@@ -2,11 +2,11 @@ import React, { useState } from 'react'
 import { DateInput, SelectBox } from '@neos-project/react-ui-components'
 import { RRule } from 'rrule'
 import { RRuleEndType, TabContentProps } from '../types'
-import { EndTabContainer } from './endTabContainer'
 import { Counter } from './counter'
 import { getInitialEndType } from '../utils/getInitialEndType'
 import { updateRRuleEndOptions } from '../utils/updateRRuleEndOptions'
 import { END_TYPE_OPTIONS } from '../utils/constants'
+import { Container } from './container'
 
 export const EndTabContent: React.FC<TabContentProps> = ({ rrule, onChange }) => {
     const [endType, setEndType] = useState<RRuleEndType>(getInitialEndType(rrule))
@@ -30,7 +30,7 @@ export const EndTabContent: React.FC<TabContentProps> = ({ rrule, onChange }) =>
     }
 
     return (
-        <EndTabContainer>
+        <Container>
             <SelectBox
                 value={endType}
                 options={END_TYPE_OPTIONS}
@@ -55,10 +55,12 @@ export const EndTabContent: React.FC<TabContentProps> = ({ rrule, onChange }) =>
 
             {endType === 'count' && (
                 <Counter
+                    prefix={'After'}
                     value={rrule.options.count ?? 0}
                     onChange={handleCountChange}
+                    suffix={'occurences.'}
                 />
             )}
-        </EndTabContainer>
+        </Container>
     )
 }

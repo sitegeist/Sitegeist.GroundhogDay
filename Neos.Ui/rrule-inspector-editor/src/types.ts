@@ -30,17 +30,14 @@ export interface IGlobalRegistry {
 
 export type RRuleEditorProps<T> = {
     value: T
-    commit: (value?: T | null | {}, ...args: any[]) => void
+    commit: (value?: T | null) => void
+}
+
+export type TabId = 'start' | 'repeat' | 'end'
+
+export interface TabContentProps {
+    rrule: RRule;
+    onChange: (updatedRRule: RRule) => void;
 }
 
 export type RRuleEndType = 'until' | 'count' | 'never';
-
-const END_TYPE_OPTIONS = [
-    { label: 'Never', value: 'never' },
-    { label: 'Until Date', value: 'until' },
-    { label: 'Occurences', value: 'count' }
-]
-  
-export const getEndTypeOptions = () => {
-    return END_TYPE_OPTIONS
-}

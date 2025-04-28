@@ -12,15 +12,15 @@ export const Container = styled.div`
     }
 
     .tabs-nav-item:nth-child(1) {
-        width: 25%;
+        width: 30%;
     }
 
     .tabs-nav-item:nth-child(2) {
-        width: 50%;
+        width: 40%;
     }
 
     .tabs-nav-item:nth-child(3) {
-        width: 25%;
+        width: 30%;
     }
     
     .tabs-nav-item-btn {

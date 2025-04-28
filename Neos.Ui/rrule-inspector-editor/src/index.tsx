@@ -22,7 +22,7 @@ export function registerRRulEditor(globalRegistry: IGlobalRegistry): void {
         component: (props: any) => {
             const { value, ...rest } = props
 
-            return <RRuleEditor {...rest} value={!value || Object.keys(value).length === 0 ? undefined : value} />
+            return <RRuleEditor {...rest} value={value} />
         },
     })
 }

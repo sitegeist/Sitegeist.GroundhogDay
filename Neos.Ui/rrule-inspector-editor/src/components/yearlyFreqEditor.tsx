@@ -9,10 +9,11 @@ import MonthdaySelector from './monthDaySelector';
 import SetPosSelector from './setPosSelector';
 import MonthSelector from './monthSelector';
 import { updateRRuleYearFrequencyOptions } from '../utils/updateRRuleYearFrequencyOptions';
+import { getInitialYearFrequencyType } from '../utils/getInitialYearFrequencyType';
 
 
 export const YearlyFreqEditor: React.FC<TabContentProps> = ({ rrule, onChange }) => {
-    const [yearlyFreqType, setyearlyFreqType] = useState<YearlyFrequencyType>();
+    const [yearlyFreqType, setyearlyFreqType] = useState<YearlyFrequencyType>(getInitialYearFrequencyType(rrule));
 
     const handleIntervalChange = (interval: number) => {
         const updatedRRule = new RRule({

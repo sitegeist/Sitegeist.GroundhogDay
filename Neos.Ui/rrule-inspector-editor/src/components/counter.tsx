@@ -1,5 +1,5 @@
 import React from 'react'
-import { TextInput, IconButton } from '@neos-project/react-ui-components'
+import { TextInput, IconButton, Label } from '@neos-project/react-ui-components'
 import styled from 'styled-components';
 
 export const CounterWrapper = styled.div`
@@ -21,7 +21,7 @@ export const Counter: React.FC<CounterProps> = ({ value, onChange, prefix, suffi
 
     return (
         <CounterWrapper>
-            {prefix && <span>{prefix}</span>}
+            {prefix && <Label>{prefix}</Label>}
             <IconButton icon="minus" onClick={decrease} />
             <TextInput
                 type="number"
@@ -29,7 +29,7 @@ export const Counter: React.FC<CounterProps> = ({ value, onChange, prefix, suffi
                 onChange={(val) => onChange(Number(val))}
             />
             <IconButton icon="plus" onClick={increase} />
-            {suffix&& <span>{suffix}</span>}
+            {suffix&& <Label>{suffix}</Label>}
         </CounterWrapper>
     )
 }

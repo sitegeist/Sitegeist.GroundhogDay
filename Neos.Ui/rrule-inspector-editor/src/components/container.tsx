@@ -11,20 +11,8 @@ export const EditorContainer = styled.div`
         flex-grow: 0;
     }
 
-    .tabs-nav-item-month-freq {
+    .tabs-nav-item {
         width: 50%;
-    }
-
-    .tabs-nav-item:nth-child(1) {
-        width: 30%;
-    }
-
-    .tabs-nav-item:nth-child(2) {
-        width: 40%;
-    }
-
-    .tabs-nav-item:nth-child(3) {
-        width: 30%;
     }
     
     .tabs-nav-item-btn {

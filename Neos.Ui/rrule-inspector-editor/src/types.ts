@@ -33,7 +33,7 @@ export type RRuleEditorProps<T> = {
     commit: (value?: T | null) => void
 }
 
-export type TabId = 'start' | 'repeat' | 'end'
+export type RRuleTab = 'repeat' | 'end'
 
 export interface TabContentProps {
     rrule: RRule;

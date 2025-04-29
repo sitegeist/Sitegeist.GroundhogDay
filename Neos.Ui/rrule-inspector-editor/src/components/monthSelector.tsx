@@ -6,15 +6,14 @@ import { MONTH_OPTIONS } from '../utils/constants';
 import { Container } from './container';
 
 const SelectedItemsContainer = styled.div`
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 4px;
 `;
 
 const SelectedItem = styled.button<{ selected: boolean }>`
     background-color: ${({ selected }) => (selected ? '#00adee' : '#323232')};
     color: white;
-    width: fit-content;
     font-size: 12px;
     padding: 10px;
     border: none;

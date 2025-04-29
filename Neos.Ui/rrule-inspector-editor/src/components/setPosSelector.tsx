@@ -2,7 +2,7 @@ import React from 'react';
 import { RRule } from 'rrule';
 import { TabContentProps } from '../types';
 import { Container } from './container';
-import { SelectBox } from '@neos-project/react-ui-components';
+import { Label, SelectBox } from '@neos-project/react-ui-components';
 import { BYDAY_OPTIONS, BYSETPOS_OPTIONS } from '../utils/constants';
 
 const SetPosSelector: React.FC<TabContentProps> = ({ rrule, onChange }) => {
@@ -25,7 +25,7 @@ const SetPosSelector: React.FC<TabContentProps> = ({ rrule, onChange }) => {
 
     return (
         <Container>
-            <span>On the</span>
+            <Label>On the</Label>
             <SelectBox
                 options={BYSETPOS_OPTIONS}
                 value={rrule.options.bysetpos}

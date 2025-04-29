@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { ByWeekday, RRule } from 'rrule';
 import { WEEKDAY_OPTIONS } from '../utils/constants';
 import { TabContentProps } from '../types';
+import { Container } from './container';
+import { Label } from '@neos-project/react-ui-components';
 
 const SelectedItemsContainer = styled.div`
     display: flex;
@@ -46,17 +48,20 @@ const WeekdaySelector: React.FC<TabContentProps> = ({ rrule, onChange }) => {
     };
 
     return (
-        <SelectedItemsContainer>
-            {WEEKDAY_OPTIONS.map((option) => (
-                <SelectedItem
-                    key={option.value}
-                    selected={weekdays?.includes(option.value)}
-                    onClick={() => handleSelectChange(option.value)}
-                >
-                    {option.label}
-                </SelectedItem>
-            ))}
-        </SelectedItemsContainer>
+        <Container>
+            <Label>On selected days:</Label>
+            <SelectedItemsContainer>
+                {WEEKDAY_OPTIONS.map((option) => (
+                    <SelectedItem
+                        key={option.value}
+                        selected={weekdays?.includes(option.value)}
+                        onClick={() => handleSelectChange(option.value)}
+                    >
+                        {option.label}
+                    </SelectedItem>
+                ))}
+            </SelectedItemsContainer>
+        </Container>
     );
 };
 

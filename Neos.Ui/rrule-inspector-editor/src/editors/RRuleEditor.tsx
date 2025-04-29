@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { EditorContainer } from '../components/container'
-import { RRuleEditorProps, RRuleEndType, TabId } from '../types'
+import { RRuleEditorProps, RRuleEndType, RRuleTab } from '../types'
 import { RRule } from 'rrule'
 import { Tabs } from '@neos-project/react-ui-components'
-import { StartTabContent } from '../components/startTabContent'
 import { RepeatTabContent } from '../components/repeatTabContent'
 import { EndTabContent } from '../components/endTabContent'
 import { useExternalRRule } from '../hooks/useExternalRRule'
+import { DTStartEditor } from '../components/dtStartEditor'
 
 export const RRuleEditor: React.FC<RRuleEditorProps<string>> = ({ value, commit }) => {
     const externalValue: RRule = useExternalRRule(value)
 
     const [rrule, setRRule] = useState<RRule>(externalValue)
-    const [activeTab, setActiveTab] = useState('start')
+    const [activeTab, setActiveTab] = useState<RRuleTab>('repeat')
 
     const handleRRuleChange = (updatedRule: RRule) => {
         setRRule(new RRule({
@@ -31,24 +31,16 @@ export const RRuleEditor: React.FC<RRuleEditorProps<string>> = ({ value, commit 
 
     return (
         <EditorContainer>
+            <DTStartEditor rrule={rrule} onChange={handleRRuleChange} />
             <Tabs  
                 activeTab={activeTab}
-                onActiveTabChange={(id: RRuleEndType) => setActiveTab(id)}
+                onActiveTabChange={(id: RRuleTab) => setActiveTab(id)}
                 theme={{
                     'tabNavigation__item': 'tabs-nav-item',
                     'tabNavigation__itemBtn': 'tabs-nav-item-btn',
                     'tabs__content': 'tabs-content'
                 }}
             >
-                <Tabs.Panel
-                    title="Start"
-                    id="start"
-                >
-                    <StartTabContent
-                        rrule={rrule}
-                        onChange={handleRRuleChange}
-                    />
-                </Tabs.Panel>
                 <Tabs.Panel
                     title="Repeat"
                     id="repeat"

@@ -36,7 +36,7 @@ export const YearlyFreqEditor: React.FC<TabContentProps> = ({ rrule, onChange })
                     setyearlyFreqType(type)
                 }}
                 theme={{
-                    'tabNavigation__item': 'tabs-nav-item-month-freq',
+                    'tabNavigation__item': 'tabs-nav-item',
                     'tabNavigation__itemBtn': 'tabs-nav-item-btn',
                     'tabs__content': 'tabs-content'
                 }}

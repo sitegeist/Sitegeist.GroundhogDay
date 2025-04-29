@@ -38,7 +38,7 @@ export const MonthFrequencyEditor: React.FC<TabContentProps> = ({ rrule, onChang
                     onChange(updateRRuleMonthFrequencyOptions(rrule, type))
                 }}
                 theme={{
-                    'tabNavigation__item': 'tabs-nav-item-month-freq',
+                    'tabNavigation__item': 'tabs-nav-item',
                     'tabNavigation__itemBtn': 'tabs-nav-item-btn',
                     'tabs__content': 'tabs-content'
                 }}

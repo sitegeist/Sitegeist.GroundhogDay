@@ -25,6 +25,7 @@ use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
 class EventRelay
 {
     /**
+     * @param array<string,string> $eventIdsToCheckForRemoval
      * @param array<RecurrenceRuleWasChanged> $eventsToPublish
      */
     public function __construct(
@@ -102,6 +103,7 @@ class EventRelay
         foreach ($this->eventIdsToCheckForRemoval as $eventId) {
             $recordQuery = $this->nodeDataRepository->createQuery();
             $numberOfRemainingRecords = $recordQuery->matching(
+                /** @phpstan-ignore-next-line (botched variadics) */
                 $recordQuery->logicalAnd(
                     $recordQuery->equals('workspace', 'live'),
                     $recordQuery->equals('identifier', $eventId),

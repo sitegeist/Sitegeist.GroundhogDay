@@ -170,6 +170,7 @@ final class EventOccurrenceRepository
     {
         $recordQuery = $this->nodeDataRepository->createQuery();
         $nodeDataRecords = $recordQuery->matching(
+            /** @phpstan-ignore-next-line (botched variadics) */
             $recordQuery->logicalAnd(
                 $recordQuery->equals('workspace', 'live'),
                 $recordQuery->in(
@@ -198,16 +199,13 @@ final class EventOccurrenceRepository
                         continue;
                     }
 
-                    $totalRows = $this->databaseConnection->executeQuery(
-                        'SELECT * FROM ' . self::TABLE_NAME,
-                    )->fetchAllAssociative();
-
                     /** @todo make configurable */
                     $recurrenceLimitDate = $referenceDate->add(new \DateInterval('P1Y'));
                     foreach (
                         $renderer->transform(
                             $rule,
                             new BetweenConstraint(
+                                /** @phpstan-ignore-next-line (always \DateTimeImmutable) */
                                 \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $lastRecurrenceRecord['start_date']),
                                 $recurrenceLimitDate
                             )
@@ -255,6 +253,7 @@ final class EventOccurrenceRepository
      */
     private function findLastRecurrenceRecord(NodeAggregateIdentifier $eventId): ?array
     {
+        /** @phpstan-ignore-next-line (array shenanigans) */
         return $this->databaseConnection->executeQuery(
             'SELECT * FROM ' . self::TABLE_NAME
             . ' WHERE event_id = :eventId AND source = :source'

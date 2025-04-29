@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace Sitegeist\GroundhogDay\Domain;
 
 use Doctrine\DBAL\Connection;
+use Neos\ContentRepository\Domain\Model\NodeData;
+use Neos\ContentRepository\Domain\Model\NodeType;
 use Neos\ContentRepository\Domain\NodeAggregate\NodeAggregateIdentifier;
+use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
+use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\Doctrine\ConnectionFactory;
 use Recurr\Rule;
 use Recurr\Transformer\ArrayTransformer;
 use Recurr\Transformer\Constraint\BeforeConstraint;
+use Recurr\Transformer\Constraint\BetweenConstraint;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
 
 /**
@@ -29,6 +34,8 @@ final class EventOccurrenceRepository
 
     public function __construct(
         ConnectionFactory $connectionFactory,
+        private readonly NodeDataRepository $nodeDataRepository,
+        private readonly NodeTypeManager $nodeTypeManager,
     ) {
         $this->databaseConnection = $connectionFactory->create();
     }
@@ -151,12 +158,84 @@ final class EventOccurrenceRepository
                         'calendar_id' => (string)$calendarId,
                         'event_id' => (string)$eventId,
                         'start_date' => $futureDate->startDate->format(self::DATE_FORMAT),
-                        'end_date' => $futureDate->startDate->format(self::DATE_FORMAT),
+                        'end_date' => $futureDate->endDate->format(self::DATE_FORMAT),
                         'source' => EventOccurrenceSource::SOURCE_RECURRENCE_RULE->value,
                     ]
                 );
             }
         });
+    }
+
+    public function continueAllRecurrenceRules(\DateTimeImmutable $referenceDate): void
+    {
+        $recordQuery = $this->nodeDataRepository->createQuery();
+        $nodeDataRecords = $recordQuery->matching(
+            $recordQuery->logicalAnd(
+                $recordQuery->equals('workspace', 'live'),
+                $recordQuery->in(
+                    'nodeType',
+                    array_map(
+                        fn (NodeType $nodeType): string => $nodeType->getName(),
+                        $this->nodeTypeManager->getSubNodeTypes('Sitegeist.GroundhogDay:Mixin.Event', false)
+                    )
+                )
+            )
+        )->execute();
+
+        $renderer = new ArrayTransformer();
+        /** @var iterable<NodeData> $nodeDataRecords */
+        foreach ($nodeDataRecords as $nodeDataRecord) {
+            $recurrenceRule = $nodeDataRecord->getProperty('recurrenceRule');
+            if ($recurrenceRule instanceof RecurrenceRule) {
+                $rule = new Rule($recurrenceRule->value);
+                if (!$rule->getEndDate()) {
+                    $eventId = NodeAggregateIdentifier::fromString($nodeDataRecord->getIdentifier());
+                    /** @var list<EventOccurrence> $futureDates */
+                    $futureDates = [];
+                    $lastRecurrenceRecord = $this->findLastRecurrenceRecord($eventId);
+                    if (!$lastRecurrenceRecord) {
+                        // this is technically not correct, but resolving ancestors from event IDs is something for Neos 9
+                        continue;
+                    }
+
+                    $totalRows = $this->databaseConnection->executeQuery(
+                        'SELECT * FROM ' . self::TABLE_NAME,
+                    )->fetchAllAssociative();
+
+                    /** @todo make configurable */
+                    $recurrenceLimitDate = $referenceDate->add(new \DateInterval('P1Y'));
+                    foreach (
+                        $renderer->transform(
+                            $rule,
+                            new BetweenConstraint(
+                                \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $lastRecurrenceRecord['start_date']),
+                                $recurrenceLimitDate
+                            )
+                        ) as $recurrence
+                    ) {
+                        $occurrence = EventOccurrence::tryFromRecurrence($eventId, $recurrence);
+                        if (!$occurrence instanceof EventOccurrence) {
+                            continue;
+                        }
+
+                        $futureDates[] = $occurrence;
+                    }
+
+                    foreach ($futureDates as $futureDate) {
+                        $this->databaseConnection->insert(
+                            self::TABLE_NAME,
+                            [
+                                'calendar_id' => $lastRecurrenceRecord['calendar_id'],
+                                'event_id' => (string)$eventId,
+                                'start_date' => $futureDate->startDate->format(self::DATE_FORMAT),
+                                'end_date' => $futureDate->endDate->format(self::DATE_FORMAT),
+                                'source' => EventOccurrenceSource::SOURCE_RECURRENCE_RULE->value,
+                            ]
+                        );
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -169,6 +248,23 @@ final class EventOccurrenceRepository
             self::createDate($row['start_date']),
             self::createDate($row['end_date']),
         );
+    }
+
+    /**
+     * @return ?DatabaseRow
+     */
+    private function findLastRecurrenceRecord(NodeAggregateIdentifier $eventId): ?array
+    {
+        return $this->databaseConnection->executeQuery(
+            'SELECT * FROM ' . self::TABLE_NAME
+            . ' WHERE event_id = :eventId AND source = :source'
+            . ' ORDER BY start_date DESC'
+            . ' LIMIT 1',
+            [
+                'eventId' => (string)$eventId,
+                'source' => EventOccurrenceSource::SOURCE_RECURRENCE_RULE->value,
+            ]
+        )->fetchAssociative() ?: null;
     }
 
     private static function createDate(string $dateString): \DateTimeImmutable

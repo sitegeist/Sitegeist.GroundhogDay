@@ -8,7 +8,7 @@ use Neos\Flow\Cli\CommandController;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceZookeeper;
 use Sitegeist\GroundhogDay\Domain\TimeHasPassed;
 
-final class EventDateCommandController extends CommandController
+final class EventOccurrenceCommandController extends CommandController
 {
     public function __construct(
         private readonly EventOccurrenceZookeeper $eventDateZookeeper,

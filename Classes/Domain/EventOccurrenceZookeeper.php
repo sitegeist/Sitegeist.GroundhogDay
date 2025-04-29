@@ -17,27 +17,26 @@ use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
 final class EventOccurrenceZookeeper
 {
     public function __construct(
-        private readonly EventOccurrenceRepository $eventDateRepository,
+        private readonly EventOccurrenceRepository $eventOccurrenceRepository,
     ) {
     }
 
     public function whenRecurrenceRuleWasChanged(RecurrenceRuleWasChanged $event): void
     {
         if ($event->changedRule === null) {
-            $this->eventDateRepository->removeAllFutureRecurrencesByEventId($event->eventId, $event->dateOfChange);
+            $this->eventOccurrenceRepository->removeAllFutureRecurrencesByEventId($event->eventId, $event->dateOfChange);
         } else {
-            $this->eventDateRepository->replaceAllFutureRecurrencesByEventId($event->calendarId, $event->eventId, $event->changedRule, $event->dateOfChange);
+            $this->eventOccurrenceRepository->replaceAllFutureRecurrencesByEventId($event->calendarId, $event->eventId, $event->changedRule, $event->dateOfChange);
         }
     }
 
     public function whenEventWasRemoved(EventWasRemoved $event): void
     {
-        $this->eventDateRepository->removeAllOccurrencesByEventId($event->eventId);
+        $this->eventOccurrenceRepository->removeAllOccurrencesByEventId($event->eventId);
     }
 
     public function whenTimeHasPassed(TimeHasPassed $event): void
     {
-        #\Neos\Flow\var_dump($event);
-        #exit();
+        $this->eventOccurrenceRepository->continueAllRecurrenceRules($event->dateTime);
     }
 }

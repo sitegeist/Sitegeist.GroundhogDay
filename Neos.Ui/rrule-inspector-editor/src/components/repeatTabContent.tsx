@@ -2,14 +2,17 @@ import React from 'react'
 import { Frequency, RRule } from 'rrule'
 import { TabContentProps } from '../types'
 import { SelectBox } from '@neos-project/react-ui-components'
-import { FREQ_TYPE_OPTIONS } from '../utils/constants'
+import { getFreqTypeOptions } from '../utils/constants'
 import { Counter } from './counter'
 import WeekdaySelector from './weekdaySelector'
 import { Container } from './container'
 import { MonthFrequencyEditor } from './monthFrequencyEditor'
 import { YearlyFreqEditor } from './yearlyFreqEditor'
+import { useI18n } from '@sitegeist/groundhogday-neos-bridge'
 
 export const RepeatTabContent: React.FC<TabContentProps> = ({ rrule, onChange }) => {
+    const i18n = useI18n();
+    
     const handleIntervalChange = (newInterval: number) => {
         const updatedRRule = new RRule({
             ...rrule.options,
@@ -39,34 +42,34 @@ export const RepeatTabContent: React.FC<TabContentProps> = ({ rrule, onChange })
         <Container>
             <SelectBox
                 value={rrule.options.freq}
-                options={FREQ_TYPE_OPTIONS}
+                options={getFreqTypeOptions(i18n)}
                 onValueChange={handleFrequencyTypeChange}
             />
 
             {rrule.options.freq == Frequency.HOURLY &&
                 <Counter
-                    prefix={'Every'}
+                    prefix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.every')}
                     value={rrule.options.interval ?? 0}
                     onChange={handleIntervalChange}
-                    suffix={'Hour(s)'}
+                    suffix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.hours')}
                 />
             }
 
             {rrule.options.freq == Frequency.DAILY &&
                 <Counter
-                    prefix={'Every'}
+                    prefix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.every')}
                     value={rrule.options.interval ?? 0}
                     onChange={handleIntervalChange}
-                    suffix={'Day(s)'}
+                    suffix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.days')}
                 />
             }
 
             {rrule.options.freq == Frequency.WEEKLY &&
                 <Counter
-                    prefix={'Every'}
+                    prefix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.every')}
                     value={rrule.options.interval ?? 0}
                     onChange={handleIntervalChange}
-                    suffix={'Week(s)'}
+                    suffix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.weeks')}
                 />
             }
 

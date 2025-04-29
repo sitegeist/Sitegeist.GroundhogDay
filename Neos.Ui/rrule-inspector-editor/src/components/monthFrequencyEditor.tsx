@@ -9,10 +9,12 @@ import MonthdaySelector from './monthDaySelector';
 import { getInitialMonthFrequencyType } from '../utils/getInitialMonthFrequencyType';
 import SetPosSelector from './setPosSelector';
 import { updateRRuleMonthFrequencyOptions } from '../utils/updateRRuleMonthFrequencyOptions';
+import { useI18n } from '@sitegeist/groundhogday-neos-bridge';
 
 
 export const MonthFrequencyEditor: React.FC<TabContentProps> = ({ rrule, onChange }) => {
     const [freqMonthType, setFreqMonthType] = useState<MonthFrequencyType>(getInitialMonthFrequencyType(rrule));
+    const i18n = useI18n();
 
     const handleIntervalChange = (interval: number) => {
         const updatedRRule = new RRule({
@@ -25,10 +27,10 @@ export const MonthFrequencyEditor: React.FC<TabContentProps> = ({ rrule, onChang
     return (
         <Container>
             <Counter
-                prefix="Every"
+                prefix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.every')}
                 value={rrule.options.interval ?? 1}
                 onChange={handleIntervalChange}
-                suffix="Month(s)"
+                suffix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.months')}
             />
 
             <Tabs  
@@ -44,13 +46,13 @@ export const MonthFrequencyEditor: React.FC<TabContentProps> = ({ rrule, onChang
                 }}
             >
                 <Tabs.Panel
-                    title="By Day(s)"
+                    title={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.onDays')}
                     id="bymonthday"
                 >
                     <MonthdaySelector rrule={rrule} onChange={onChange} />
                 </Tabs.Panel>
                 <Tabs.Panel
-                    title="On nth Day"
+                    title={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.onThe')}
                     id="bysetpos"
                 >
                     <SetPosSelector rrule={rrule} onChange={onChange} />

@@ -7,9 +7,11 @@ import { RepeatTabContent } from '../components/repeatTabContent'
 import { EndTabContent } from '../components/endTabContent'
 import { useExternalRRule } from '../hooks/useExternalRRule'
 import { DTStartEditor } from '../components/dtStartEditor'
+import { useI18n } from '@sitegeist/groundhogday-neos-bridge'
 
 export const RRuleEditor: React.FC<RRuleEditorProps<string>> = ({ value, commit }) => {
-    const externalValue: RRule = useExternalRRule(value)
+    const externalValue: RRule = useExternalRRule(value);
+    const i18n = useI18n();
 
     const [rrule, setRRule] = useState<RRule>(externalValue)
     const [activeTab, setActiveTab] = useState<RRuleTab>('repeat')
@@ -38,7 +40,7 @@ export const RRuleEditor: React.FC<RRuleEditorProps<string>> = ({ value, commit 
                 }}
             >
                 <Tabs.Panel
-                    title="Repeat"
+                    title={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.repeat')}
                     id="repeat"
                 >
                     <RepeatTabContent
@@ -47,7 +49,7 @@ export const RRuleEditor: React.FC<RRuleEditorProps<string>> = ({ value, commit 
                     />
                 </Tabs.Panel>
                 <Tabs.Panel
-                    title="End"
+                    title={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.end')}
                     id="end"
                 >
                     <EndTabContent

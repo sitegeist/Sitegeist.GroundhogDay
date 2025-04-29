@@ -1,61 +1,52 @@
 import { Frequency } from "rrule"
 
-export const END_TYPE_OPTIONS = [
-    { label: 'Never', value: 'never', icon: 'infinity' },
-    { label: 'Until Date', value: 'until', icon: 'calendar-week' },
-    { label: 'Occurences', value: 'count', icon: 'hashtag' }
-]
+export type I18nFn = (key: string) => string;
 
-export const FREQ_TYPE_OPTIONS = [
-    { label: 'Yearly', value: Frequency.YEARLY, icon: 'calendar' },
-    { label: 'Monthly', value: Frequency.MONTHLY, icon: 'calendar-alt' },
-    { label: 'Weekly', value: Frequency.WEEKLY, icon: 'calendar-week' },
-    { label: 'Daily', value: Frequency.DAILY, icon: 'calendar-day' },
-    { label: 'Hourly', value: Frequency.HOURLY, icon: 'clock' }
-]
+const BASE = 'Sitegeist.GroundhogDay:NodeTypes.Mixin.Event';
 
-export const WEEKDAY_OPTIONS = [
-    { label: 'Mo', value: 0 },
-    { label: 'Tu', value: 1 },
-    { label: 'We', value: 2 },
-    { label: 'Th', value: 3 },
-    { label: 'Fr', value: 4 },
-    { label: 'Sa', value: 5 },
-    { label: 'Su', value: 6 }
-]
+export const getEndTypeOptions = (i18n: I18nFn) => [
+    { label: i18n(`${BASE}:end.never`), value: 'never', icon: 'infinity' },
+    { label: i18n(`${BASE}:end.until`), value: 'until', icon: 'calendar-week' },
+    { label: i18n(`${BASE}:end.count`), value: 'count', icon: 'hashtag' },
+];
 
-export const BYSETPOS_OPTIONS = [
-    { label: 'First', value: 1 },
-    { label: 'Second', value: 2 },
-    { label: 'Third', value: 3 },
-    { label: 'Fourth', value: 4 },
-    { label: 'Last', value: -1 }
-]
+export const getFreqTypeOptions = (i18n: I18nFn) => [
+    { label: i18n(`${BASE}:freq.yearly`), value: Frequency.YEARLY, icon: 'calendar' },
+    { label: i18n(`${BASE}:freq.monthly`), value: Frequency.MONTHLY, icon: 'calendar-alt' },
+    { label: i18n(`${BASE}:freq.weekly`), value: Frequency.WEEKLY, icon: 'calendar-week' },
+    { label: i18n(`${BASE}:freq.daily`), value: Frequency.DAILY, icon: 'calendar-day' },
+    { label: i18n(`${BASE}:freq.hourly`), value: Frequency.HOURLY, icon: 'clock' },
+];
 
-export const BYDAY_OPTIONS = [
-    { label: 'Monday', value: 0 },
-    { label: 'Tuesday', value: 1 },
-    { label: 'Wednsday', value: 2 },
-    { label: 'Thursday', value: 3 },
-    { label: 'Friday', value: 4 },
-    { label: 'Saturday', value: 5 },
-    { label: 'Sunday', value: 6 },
-    { label: 'Day', value: [0, 1, 2, 3, 4, 5, 6] },
-    { label: 'Weekday', value: [0, 1, 2, 3, 4] },
-    { label: 'Weekendday', value: [5,6] }
-]
+export const getWeekdayOptions = (i18n: I18nFn) => [
+    { label: i18n(`${BASE}:weekday.mo`), value: 0 },
+    { label: i18n(`${BASE}:weekday.tu`), value: 1 },
+    { label: i18n(`${BASE}:weekday.we`), value: 2 },
+    { label: i18n(`${BASE}:weekday.th`), value: 3 },
+    { label: i18n(`${BASE}:weekday.fr`), value: 4 },
+    { label: i18n(`${BASE}:weekday.sa`), value: 5 },
+    { label: i18n(`${BASE}:weekday.su`), value: 6 },
+];
 
-export const MONTH_OPTIONS = [
-    { label: 'Jan', value: 1 },
-    { label: 'Feb', value: 2 },
-    { label: 'Mar', value: 3 },
-    { label: 'Apr', value: 4 },
-    { label: 'May', value: 5 },
-    { label: 'Jun', value: 6 },
-    { label: 'Jul', value: 7 },
-    { label: 'Aug', value: 8 },
-    { label: 'Sep', value: 9 },
-    { label: 'Oct', value: 10 },
-    { label: 'Nov', value: 11 },
-    { label: 'Dec', value: 12 },
+export const getBySetPosOptions = (i18n: I18nFn) => [
+    { label: i18n(`${BASE}:bySetPos.first`), value: 1 },
+    { label: i18n(`${BASE}:bySetPos.second`), value: 2 },
+    { label: i18n(`${BASE}:bySetPos.third`), value: 3 },
+    { label: i18n(`${BASE}:bySetPos.fourth`), value: 4 },
+    { label: i18n(`${BASE}:bySetPos.last`), value: -1 },
+];
+
+export const getMonthOptions = (i18n: I18nFn) => [
+    { label: i18n(`${BASE}:month.jan`), value: 1 },
+    { label: i18n(`${BASE}:month.feb`), value: 2 },
+    { label: i18n(`${BASE}:month.mar`), value: 3 },
+    { label: i18n(`${BASE}:month.apr`), value: 4 },
+    { label: i18n(`${BASE}:month.may`), value: 5 },
+    { label: i18n(`${BASE}:month.jun`), value: 6 },
+    { label: i18n(`${BASE}:month.jul`), value: 7 },
+    { label: i18n(`${BASE}:month.aug`), value: 8 },
+    { label: i18n(`${BASE}:month.sep`), value: 9 },
+    { label: i18n(`${BASE}:month.oct`), value: 10 },
+    { label: i18n(`${BASE}:month.nov`), value: 11 },
+    { label: i18n(`${BASE}:month.dec`), value: 12 },
 ];

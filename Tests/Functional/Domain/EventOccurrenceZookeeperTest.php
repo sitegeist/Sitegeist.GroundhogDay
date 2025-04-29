@@ -11,6 +11,7 @@ use PHPUnit\Framework\Assert;
 use Sitegeist\GroundhogDay\Domain\EventOccurrence;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceRepository;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceZookeeper;
+use Sitegeist\GroundhogDay\Domain\EventWasRemoved;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
 
@@ -30,7 +31,7 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
      * @param list<array{eventId: NodeAggregateIdentifier, eventDates: list<EventOccurrence>}> $expectedEventDatesByEventId
      * @dataProvider recurrenceRuleChangeProvider
      */
-    public function testWhenRecurrenceRuleWasChanged(array $previousEvents, RecurrenceRuleWasChanged $event, array $expectedEventDatesWithinPeriod, array $expectedEventDatesByEventId): void
+    public function testWhenRecurrenceRuleWasChanged(array $previousEvents, RecurrenceRuleWasChanged|EventWasRemoved $event, array $expectedEventDatesWithinPeriod, array $expectedEventDatesByEventId): void
     {
         $writeSubject = $this->objectManager->get(EventOccurrenceZookeeper::class);
         $readSubject = $this->objectManager->get(EventOccurrenceRepository::class);
@@ -38,7 +39,10 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
             $writeSubject->whenRecurrenceRuleWasChanged($previousEvent);
         }
 
-        $writeSubject->whenRecurrenceRuleWasChanged($event);
+        match (get_class($event)) {
+            RecurrenceRuleWasChanged::class => $writeSubject->whenRecurrenceRuleWasChanged($event),
+            EventWasRemoved::class => $writeSubject->whenEventWasRemoved($event),
+        };
 
         foreach ($expectedEventDatesWithinPeriod as $testRecord) {
             $expected = $testRecord['eventDates'];
@@ -328,12 +332,54 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
                 ]
             ]
         ];
+
+        yield 'single-day daily event, removed event' => [
+            'previousEvents' => [
+                new RecurrenceRuleWasChanged(
+                    NodeAggregateIdentifier::fromString('my-calendar'),
+                    NodeAggregateIdentifier::fromString('my-event'),
+                    RecurrenceRule::fromString('DTSTART;TZID=Europe/Berlin:20250424T143000
+RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
+                    self::createDateTime('2025-04-24 00:00:00'),
+                )
+            ],
+            'event' => new EventWasRemoved(
+                NodeAggregateIdentifier::fromString('my-event'),
+            ),
+            'expectedEventDatesWithinPeriod' => [
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTime('2025-04-17 00:00:00'),
+                    'endDate' => self::createDateTime('2025-04-23 23:59:59'),
+                    'eventDates' => []
+                ],
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTime('2025-04-18 00:00:00'),
+                    'endDate' => self::createDateTime('2025-04-24 23:59:59'),
+                    'eventDates' => []
+                ],
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTime('2025-05-03 00:00:00'),
+                    'endDate' => self::createDateTime('2025-05-16 23:59:59'),
+                    'eventDates' => []
+                ],
+            ],
+            'expectedEventDatesByEventId' => [
+                [
+                    'eventId' => NodeAggregateIdentifier::fromString('my-event'),
+                    'eventDates' => []
+                ]
+            ]
+        ];
     }
 
     private static function createDateTime(string $date): \DateTimeImmutable
     {
         return \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $date);
     }
+
     private function setUpPersistence(): void
     {
         /** @var DoctrineService $doctrineService */

@@ -30,6 +30,11 @@ final class EventOccurrenceZookeeper
         }
     }
 
+    public function whenEventWasRemoved(EventWasRemoved $event): void
+    {
+        $this->eventDateRepository->removeAllOccurrencesByEventId($event->eventId);
+    }
+
     public function whenTimeHasPassed(TimeHasPassed $event): void
     {
         #\Neos\Flow\var_dump($event);

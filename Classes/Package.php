@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Sitegeist\GroundhogDay;
 
-use Neos\ContentRepository\Domain\Model\Node;
+use Neos\ContentRepository\Domain\Model\Workspace;
 use Neos\Flow\Core\Bootstrap;
 use Neos\Flow\Package as BasePackage;
 use Sitegeist\GroundhogDay\Infrastructure\EventRelay;
@@ -19,10 +19,16 @@ class Package extends BasePackage
         $dispatcher = $bootstrap->getSignalSlotDispatcher();
 
         $dispatcher->connect(
-            Node::class,
-            'nodePropertyChanged',
+            Workspace::class,
+            'beforeNodePublishing',
             EventRelay::class,
-            'registerPropertyChange'
+            'beforeNodeWasPublished'
+        );
+        $dispatcher->connect(
+            Workspace::class,
+            'afterNodePublishing',
+            EventRelay::class,
+            'afterNodeWasPublished'
         );
     }
 }

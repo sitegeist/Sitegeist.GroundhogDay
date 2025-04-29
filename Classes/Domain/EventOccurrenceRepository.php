@@ -93,6 +93,16 @@ final class EventOccurrenceRepository
         }
     }
 
+    public function removeAllOccurrencesByEventId(NodeAggregateIdentifier $eventId): void
+    {
+        $this->databaseConnection->executeStatement(
+            'DELETE FROM ' . self::TABLE_NAME . ' WHERE event_id = :eventId',
+            [
+                'eventId' => (string)$eventId,
+            ]
+        );
+    }
+
     public function removeAllFutureRecurrencesByEventId(NodeAggregateIdentifier $eventId, \DateTimeImmutable $referenceDate): void
     {
         $this->databaseConnection->executeStatement(

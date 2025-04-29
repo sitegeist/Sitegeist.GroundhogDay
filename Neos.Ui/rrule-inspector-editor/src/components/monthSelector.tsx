@@ -4,6 +4,7 @@ import { RRule } from 'rrule';
 import { TabContentProps } from '../types';
 import { MONTH_OPTIONS } from '../utils/constants';
 import { Container } from './container';
+import { Label } from '@neos-project/react-ui-components';
 
 const SelectedItemsContainer = styled.div`
     display: grid;
@@ -45,7 +46,7 @@ const MonthSelector: React.FC<TabContentProps> = ({ rrule, onChange }) => {
 
     return (
         <Container>
-            <span>On selected months:</span>
+            <Label>On selected months:</Label>
             <SelectedItemsContainer>
                 {MONTH_OPTIONS.map((option) => (
                     <SelectedItem

@@ -4,6 +4,7 @@ import { TabContentProps } from '../types';
 import { Container } from './container';
 import { Label, SelectBox } from '@neos-project/react-ui-components';
 import { BYDAY_OPTIONS, BYSETPOS_OPTIONS } from '../utils/constants';
+import WeekdaySelector from './weekdaySelector';
 
 const SetPosSelector: React.FC<TabContentProps> = ({ rrule, onChange }) => {
 
@@ -11,14 +12,6 @@ const SetPosSelector: React.FC<TabContentProps> = ({ rrule, onChange }) => {
         const updatedOptions = new RRule({
             ...rrule.options,
             bysetpos: value ?? undefined,
-        });
-        onChange(updatedOptions);
-    };
-
-    const handleByDayChange = (value: number) => {
-        const updatedOptions = new RRule({
-            ...rrule.options,
-            byweekday: value ?? undefined,
         });
         onChange(updatedOptions);
     };
@@ -31,11 +24,7 @@ const SetPosSelector: React.FC<TabContentProps> = ({ rrule, onChange }) => {
                 value={rrule.options.bysetpos}
                 onValueChange={(value) => handleSetPosChange(value)}
             />
-            <SelectBox
-                options={BYDAY_OPTIONS}
-                value={rrule.options.byweekday}
-                onValueChange={(value) => handleByDayChange(value)}
-            />
+            <WeekdaySelector hideLabel rrule={rrule} onChange={onChange} />
         </Container>
     );
 };

@@ -8,6 +8,7 @@ import { Tabs } from '@neos-project/react-ui-components';
 import MonthdaySelector from './monthDaySelector';
 import SetPosSelector from './setPosSelector';
 import MonthSelector from './monthSelector';
+import { updateRRuleYearFrequencyOptions } from '../utils/updateRRuleYearFrequencyOptions';
 
 
 export const YearlyFreqEditor: React.FC<TabContentProps> = ({ rrule, onChange }) => {
@@ -34,6 +35,7 @@ export const YearlyFreqEditor: React.FC<TabContentProps> = ({ rrule, onChange })
                 activeTab={yearlyFreqType}
                 onActiveTabChange={(type: YearlyFrequencyType) => {
                     setyearlyFreqType(type)
+                    onChange(updateRRuleYearFrequencyOptions(rrule, type))
                 }}
                 theme={{
                     'tabNavigation__item': 'tabs-nav-item',

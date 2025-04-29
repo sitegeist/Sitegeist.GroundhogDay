@@ -25,10 +25,6 @@ export const RRuleEditor: React.FC<RRuleEditorProps<string>> = ({ value, commit 
         commit(updatedRule.toString())
     }
 
-    useEffect(() => {
-        console.log(rrule.toString())
-    }, [rrule])
-
     return (
         <EditorContainer>
             <DTStartEditor rrule={rrule} onChange={handleRRuleChange} />

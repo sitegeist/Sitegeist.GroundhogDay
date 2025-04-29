@@ -261,6 +261,73 @@ RRULE:FREQ=DAILY;INTERVAL=7;COUNT=5'),
                 ]
             ]
         ];
+
+        yield 'single-day daily event, removed recurrence rule' => [
+            'previousEvents' => [
+                new RecurrenceRuleWasChanged(
+                    NodeAggregateIdentifier::fromString('my-calendar'),
+                    NodeAggregateIdentifier::fromString('my-event'),
+                    RecurrenceRule::fromString('DTSTART;TZID=Europe/Berlin:20250424T143000
+RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
+                    self::createDateTime('2025-04-24 00:00:00'),
+                )
+            ],
+            'event' => new RecurrenceRuleWasChanged(
+                NodeAggregateIdentifier::fromString('my-calendar'),
+                NodeAggregateIdentifier::fromString('my-event'),
+                null,
+                self::createDateTime('2025-05-14 14:00:00'),
+            ),
+            'expectedEventDatesWithinPeriod' => [
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTime('2025-04-17 00:00:00'),
+                    'endDate' => self::createDateTime('2025-04-23 23:59:59'),
+                    'eventDates' => []
+                ],
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTime('2025-04-18 00:00:00'),
+                    'endDate' => self::createDateTime('2025-04-24 23:59:59'),
+                    'eventDates' => [
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-04-24 14:30:00'),
+                            self::createDateTime('2025-04-24 14:30:00'),
+                        )
+                    ]
+                ],
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTime('2025-05-03 00:00:00'),
+                    'endDate' => self::createDateTime('2025-05-16 23:59:59'),
+                    'eventDates' => [
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-05-04 14:30:00'),
+                            self::createDateTime('2025-05-04 14:30:00'),
+                        )
+                    ]
+                ],
+            ],
+            'expectedEventDatesByEventId' => [
+                [
+                    'eventId' => NodeAggregateIdentifier::fromString('my-event'),
+                    'eventDates' => [
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-04-24 14:30:00'),
+                            self::createDateTime('2025-04-24 14:30:00'),
+                        ),
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-05-04 14:30:00'),
+                            self::createDateTime('2025-05-04 14:30:00'),
+                        ),
+                    ]
+                ]
+            ]
+        ];
     }
 
     private static function createDateTime(string $date): \DateTimeImmutable

@@ -26,7 +26,7 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
 
     /**
      * @param iterable<RecurrenceRuleWasChanged> $previousEvents
-     * @param list<array{startDate: \DateTimeImmutable, endDate: \DateTimeImmutable, eventDates: list<EventOccurrence>}> $expectedEventDatesWithinPeriod
+     * @param list<array{calendarId: NodeAggregateIdentifier, startDate: \DateTimeImmutable, endDate: \DateTimeImmutable, eventDates: list<EventOccurrence>}> $expectedEventDatesWithinPeriod
      * @param list<array{eventId: NodeAggregateIdentifier, eventDates: list<EventOccurrence>}> $expectedEventDatesByEventId
      * @dataProvider recurrenceRuleChangeProvider
      */
@@ -42,7 +42,7 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
 
         foreach ($expectedEventDatesWithinPeriod as $testRecord) {
             $expected = $testRecord['eventDates'];
-            $actual = iterator_to_array($readSubject->findEventOccurrencesWithinPeriod($testRecord['startDate'], $testRecord['endDate']));
+            $actual = iterator_to_array($readSubject->findEventOccurrencesWithinPeriod($testRecord['calendarId'], $testRecord['startDate'], $testRecord['endDate']));
             Assert::assertEquals(
                 $expected,
                 $actual,
@@ -78,6 +78,7 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
         yield 'single-day daily event, initial recurrence rule' => [
             'previousEvents' => [],
             'event' => new RecurrenceRuleWasChanged(
+                NodeAggregateIdentifier::fromString('my-calendar'),
                 NodeAggregateIdentifier::fromString('my-event'),
                 RecurrenceRule::fromString('DTSTART;TZID=Europe/Berlin:20250424T143000
 RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
@@ -85,11 +86,13 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
             ),
             'expectedEventDatesWithinPeriod' => [
                 [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
                     'startDate' => self::createDateTime('2025-04-17 00:00:00'),
                     'endDate' => self::createDateTime('2025-04-23 23:59:59'),
                     'eventDates' => []
                 ],
                 [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
                     'startDate' => self::createDateTime('2025-04-18 00:00:00'),
                     'endDate' => self::createDateTime('2025-04-24 23:59:59'),
                     'eventDates' => [
@@ -101,6 +104,7 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
                     ]
                 ],
                 [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
                     'startDate' => self::createDateTime('2025-04-18 00:00:00'),
                     'endDate' => self::createDateTime('2025-05-08 23:59:59'),
                     'eventDates' => [
@@ -117,6 +121,7 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
                     ]
                 ],
                 [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
                     'startDate' => self::createDateTime('2025-05-25 00:00:00'),
                     'endDate' => self::createDateTime('2025-06-03 23:59:59'),
                     'eventDates' => [
@@ -165,6 +170,7 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
         yield 'single-day daily event, changed recurrence rule' => [
             'previousEvents' => [
                 new RecurrenceRuleWasChanged(
+                    NodeAggregateIdentifier::fromString('my-calendar'),
                     NodeAggregateIdentifier::fromString('my-event'),
                     RecurrenceRule::fromString('DTSTART;TZID=Europe/Berlin:20250424T143000
 RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
@@ -172,6 +178,7 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
                 )
             ],
             'event' => new RecurrenceRuleWasChanged(
+                NodeAggregateIdentifier::fromString('my-calendar'),
                 NodeAggregateIdentifier::fromString('my-event'),
                 RecurrenceRule::fromString('DTSTART;TZID=Europe/Berlin:20250424T150000
 RRULE:FREQ=DAILY;INTERVAL=7;COUNT=5'),
@@ -179,11 +186,13 @@ RRULE:FREQ=DAILY;INTERVAL=7;COUNT=5'),
             ),
             'expectedEventDatesWithinPeriod' => [
                 [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
                     'startDate' => self::createDateTime('2025-04-17 00:00:00'),
                     'endDate' => self::createDateTime('2025-04-23 23:59:59'),
                     'eventDates' => []
                 ],
                 [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
                     'startDate' => self::createDateTime('2025-04-18 00:00:00'),
                     'endDate' => self::createDateTime('2025-04-24 23:59:59'),
                     'eventDates' => [
@@ -195,6 +204,7 @@ RRULE:FREQ=DAILY;INTERVAL=7;COUNT=5'),
                     ]
                 ],
                 [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
                     'startDate' => self::createDateTime('2025-05-03 00:00:00'),
                     'endDate' => self::createDateTime('2025-05-16 23:59:59'),
                     'eventDates' => [
@@ -211,6 +221,7 @@ RRULE:FREQ=DAILY;INTERVAL=7;COUNT=5'),
                     ]
                 ],
                 [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
                     'startDate' => self::createDateTime('2025-05-21 00:00:00'),
                     'endDate' => self::createDateTime('2025-06-03 23:59:59'),
                     'eventDates' => [

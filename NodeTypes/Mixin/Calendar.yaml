@@ -1,0 +1,9 @@
+'Sitegeist.GroundhogDay:Mixin.Calendar':
+  abstract: true
+  ui:
+    icon: 'calendar-alt'
+    label: i18n
+    inspector:
+      groups:
+        calendar:
+          label: i18n

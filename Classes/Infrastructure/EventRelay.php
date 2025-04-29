@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Sitegeist\GroundhogDay\Infrastructure;
 
 use Neos\ContentRepository\Domain\Model\Node;
+use Neos\ContentRepository\Domain\NodeAggregate\NodeAggregateIdentifier;
+use Neos\ContentRepository\Exception\NodeException;
 use Neos\Flow\Annotations as Flow;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceZookeeper;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
@@ -23,6 +25,9 @@ class EventRelay
     ) {
     }
 
+    /**
+     * @throws CalendarIsMissing
+     */
     public function registerPropertyChange(Node $node, string $propertyName, mixed $oldValue, mixed $newValue): void
     {
         if (
@@ -35,10 +40,29 @@ class EventRelay
 
             if ($oldComparisonValue !== $newComparisonValue) {
                 $this->eventOccurrenceZookeeper->whenRecurrenceRuleWasChanged(new RecurrenceRuleWasChanged(
+                    $this->resolveCalendarId($node),
                     $node->getNodeAggregateIdentifier(),
                     $newValue,
                     new \DateTimeImmutable(),
                 ));
+            }
+        }
+    }
+
+    /**
+     * @throws CalendarIsMissing
+     */
+    private function resolveCalendarId(Node $event): NodeAggregateIdentifier
+    {
+        $calendarCandidate = $event;
+        while ($calendarCandidate) {
+            if ($calendarCandidate->getNodeType()->isOfType('Sitegeist.GroundhogDay:Mixin.Calendar')) {
+                return $calendarCandidate->getNodeAggregateIdentifier();
+            }
+            try {
+                $calendarCandidate = $calendarCandidate->findParentNode();
+            } catch (NodeException) {
+                throw CalendarIsMissing::butWasRequired($event->getNodeAggregateIdentifier());
             }
         }
     }

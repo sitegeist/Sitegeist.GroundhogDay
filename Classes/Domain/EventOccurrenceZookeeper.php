@@ -26,7 +26,7 @@ final class EventOccurrenceZookeeper
         if ($event->changedRule === null) {
             $this->eventDateRepository->removeAllFutureRecurrencesByEventId($event->eventId, $event->dateOfChange);
         } else {
-            $this->eventDateRepository->replaceAllFutureRecurrencesByEventId($event->eventId, $event->changedRule, $event->dateOfChange);
+            $this->eventDateRepository->replaceAllFutureRecurrencesByEventId($event->calendarId, $event->eventId, $event->changedRule, $event->dateOfChange);
         }
     }
 

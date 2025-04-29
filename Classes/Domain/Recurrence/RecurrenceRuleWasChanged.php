@@ -14,6 +14,7 @@ use Neos\Flow\Annotations as Flow;
 final readonly class RecurrenceRuleWasChanged
 {
     public function __construct(
+        public NodeAggregateIdentifier $calendarId,
         public NodeAggregateIdentifier $eventId,
         public ?RecurrenceRule $changedRule,
         public \DateTimeImmutable $dateOfChange,

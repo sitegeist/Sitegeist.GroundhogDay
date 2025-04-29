@@ -2,9 +2,10 @@ import React from 'react';
 import styled from 'styled-components';
 import { RRule } from 'rrule';
 import { TabContentProps } from '../types';
-import { MONTH_OPTIONS } from '../utils/constants';
+import { getMonthOptions } from '../utils/constants';
 import { Container } from './container';
 import { Label } from '@neos-project/react-ui-components';
+import { useI18n } from '@sitegeist/groundhogday-neos-bridge';
 
 const SelectedItemsContainer = styled.div`
     display: grid;
@@ -28,6 +29,7 @@ const SelectedItem = styled.button<{ selected: boolean }>`
 
 const MonthSelector: React.FC<TabContentProps> = ({ rrule, onChange }) => {
     const months: number[] = rrule.options.bymonth || [];
+    const i18n = useI18n();
 
     const handleSelectChange = (month: number) => {
         const currentMonths = months || [];
@@ -46,9 +48,9 @@ const MonthSelector: React.FC<TabContentProps> = ({ rrule, onChange }) => {
 
     return (
         <Container>
-            <Label>On selected months:</Label>
+            <Label>{i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.onSelectedMonths')}</Label>
             <SelectedItemsContainer>
-                {MONTH_OPTIONS.map((option) => (
+                {getMonthOptions(i18n).map((option) => (
                     <SelectedItem
                         key={option.value}
                         selected={months.includes(option.value)}

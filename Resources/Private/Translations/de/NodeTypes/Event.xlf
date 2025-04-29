@@ -10,6 +10,209 @@
                 <source>Recurrence rule</source>
                 <target state="translated">Wiederholungsregel</target>
             </trans-unit>
+
+            <!-- Inspector Editor -->
+            <trans-unit id="inspector.start" xml:space="preserve" approved="yes">
+                <source>Start</source>
+                <target state="translated">Start</target>
+            </trans-unit>
+            <trans-unit id="inspector.selectDate" xml:space="preserve" approved="yes">
+                <source>Select a date</source>
+                <target state="translated">Datum auswählen</target>
+            </trans-unit>
+            <trans-unit id="inspector.after" xml:space="preserve" approved="yes">
+                <source>After</source>
+                <target state="translated">Nach</target>
+            </trans-unit>
+            <trans-unit id="inspector.occurences" xml:space="preserve" approved="yes">
+                <source>occurences.</source>
+                <target state="translated">Wiederholungen.</target>
+            </trans-unit>
+            <trans-unit id="inspector.onSelectedDates" xml:space="preserve" approved="yes">
+                <source>On selected dates:</source>
+                <target state="translated">An den ausgewählten Tagen:</target>
+            </trans-unit>
+            <trans-unit id="inspector.onSelectedDays" xml:space="preserve" approved="yes">
+                <source>On selected days:</source>
+                <target state="translated">An den ausgewählten Wochentagen:</target>
+            </trans-unit>
+            <trans-unit id="inspector.onSelectedMonths" xml:space="preserve" approved="yes">
+                <source>On selected months:</source>
+                <target state="translated">An den ausgewählten Monaten:</target>
+            </trans-unit>
+            <trans-unit id="inspector.every" xml:space="preserve" approved="yes">
+                <source>Every</source>
+                <target state="translated">Alle</target>
+            </trans-unit>
+            <trans-unit id="inspector.years" xml:space="preserve" approved="yes">
+                <source>Year(s)</source>
+                <target state="translated">Jahr(e)</target>
+            </trans-unit>
+            <trans-unit id="inspector.months" xml:space="preserve" approved="yes">
+                <source>Month(s)</source>
+                <target state="translated">Monat(e)</target>
+            </trans-unit>
+            <trans-unit id="inspector.weeks" xml:space="preserve" approved="yes">
+                <source>Week(s)</source>
+                <target state="translated">Woche(n)</target>
+            </trans-unit>
+            <trans-unit id="inspector.days" xml:space="preserve" approved="yes">
+                <source>Day(s)</source>
+                <target state="translated">Tag(e)</target>
+            </trans-unit>
+            <trans-unit id="inspector.hours" xml:space="preserve" approved="yes">
+                <source>Hour(s)</source>
+                <target state="translated">Stunde(n)</target>
+            </trans-unit>
+            <trans-unit id="inspector.onThe" xml:space="preserve" approved="yes">
+                <source>On the</source>
+                <target state="translated">Am</target>
+            </trans-unit>
+            <trans-unit id="inspector.repeat" xml:space="preserve" approved="yes">
+                <source>Repeat</source>
+                <target state="translated">Wiederholen</target>
+            </trans-unit>
+            <trans-unit id="inspector.end" xml:space="preserve" approved="yes">
+                <source>End</source>
+                <target state="translated">Ende</target>
+            </trans-unit>
+            <trans-unit id="inspector.onDays" xml:space="preserve" approved="yes">
+                <source>On Day(s)</source>
+                <target state="translated">An Tagen</target>
+            </trans-unit>
+            <trans-unit id="inspector.onMonths" xml:space="preserve" approved="yes">
+                <source>On Month(s)</source>
+                <target state="translated">An Monaten</target>
+            </trans-unit>
+            <trans-unit id="end.never" xml:space="preserve" approved="yes">
+                <source>Never</source>
+                <target state="translated">Nie</target>
+            </trans-unit>
+            <trans-unit id="end.until" xml:space="preserve" approved="yes">
+                <source>Until Date</source>
+                <target state="translated">Bis Datum</target>
+            </trans-unit>
+            <trans-unit id="end.count" xml:space="preserve" approved="yes">
+                <source>Occurences</source>
+                <target state="translated">Anzahl</target>
+            </trans-unit>
+            <trans-unit id="freq.yearly" xml:space="preserve" approved="yes">
+                <source>Yearly</source>
+                <target state="translated">Jährlich</target>
+            </trans-unit>
+            <trans-unit id="freq.monthly" xml:space="preserve" approved="yes">
+                <source>Monthly</source>
+                <target state="translated">Monatlich</target>
+            </trans-unit>
+            <trans-unit id="freq.weekly" xml:space="preserve" approved="yes">
+                <source>Weekly</source>
+                <target state="translated">Wöchentlich</target>
+            </trans-unit>
+            <trans-unit id="freq.daily" xml:space="preserve" approved="yes">
+                <source>Daily</source>
+                <target state="translated">Täglich</target>
+            </trans-unit>
+            <trans-unit id="freq.hourly" xml:space="preserve" approved="yes">
+                <source>Hourly</source>
+                <target state="translated">Stündlich</target>
+            </trans-unit>
+            <trans-unit id="weekday.mo" xml:space="preserve" approved="yes">
+                <source>Mo</source>
+                <target state="translated">Mo</target>
+            </trans-unit>
+            <trans-unit id="weekday.tu" xml:space="preserve" approved="yes">
+                <source>Tu</source>
+                <target state="translated">Di</target>
+            </trans-unit>
+            <trans-unit id="weekday.we" xml:space="preserve" approved="yes">
+                <source>We</source>
+                <target state="translated">Mi</target>
+            </trans-unit>
+            <trans-unit id="weekday.th" xml:space="preserve" approved="yes">
+                <source>Th</source>
+                <target state="translated">Do</target>
+            </trans-unit>
+            <trans-unit id="weekday.fr" xml:space="preserve" approved="yes">
+                <source>Fr</source>
+                <target state="translated">Fr</target>
+            </trans-unit>
+            <trans-unit id="weekday.sa" xml:space="preserve" approved="yes">
+                <source>Sa</source>
+                <target state="translated">Sa</target>
+            </trans-unit>
+            <trans-unit id="weekday.su" xml:space="preserve" approved="yes">
+                <source>Su</source>
+                <target state="translated">So</target>
+            </trans-unit>
+            <trans-unit id="bySetPos.first" xml:space="preserve" approved="yes">
+                <source>First</source>
+                <target state="translated">Ersten</target>
+            </trans-unit>
+            <trans-unit id="bySetPos.second" xml:space="preserve" approved="yes">
+                <source>Second</source>
+                <target state="translated">Zweiten</target>
+            </trans-unit>
+            <trans-unit id="bySetPos.third" xml:space="preserve" approved="yes">
+                <source>Third</source>
+                <target state="translated">Dritten</target>
+            </trans-unit>
+            <trans-unit id="bySetPos.fourth" xml:space="preserve" approved="yes">
+                <source>Fourth</source>
+                <target state="translated">Vierten</target>
+            </trans-unit>
+            <trans-unit id="bySetPos.last" xml:space="preserve" approved="yes">
+                <source>Last</source>
+                <target state="translated">Letzten</target>
+            </trans-unit>
+            <trans-unit id="month.jan" xml:space="preserve" approved="yes">
+                <source>Jan</source>
+                <target state="translated">Jan</target>
+            </trans-unit>
+            <trans-unit id="month.feb" xml:space="preserve" approved="yes">
+                <source>Feb</source>
+                <target state="translated">Feb</target>
+            </trans-unit>
+            <trans-unit id="month.mar" xml:space="preserve" approved="yes">
+                <source>Mar</source>
+                <target state="translated">Mär</target>
+            </trans-unit>
+            <trans-unit id="month.apr" xml:space="preserve" approved="yes">
+                <source>Apr</source>
+                <target state="translated">Apr</target>
+            </trans-unit>
+            <trans-unit id="month.may" xml:space="preserve" approved="yes">
+                <source>May</source>
+                <target state="translated">Mai</target>
+            </trans-unit>
+            <trans-unit id="month.jun" xml:space="preserve" approved="yes">
+                <source>Jun</source>
+                <target state="translated">Jun</target>
+            </trans-unit>
+            <trans-unit id="month.jul" xml:space="preserve" approved="yes">
+                <source>Jul</source>
+                <target state="translated">Jul</target>
+            </trans-unit>
+            <trans-unit id="month.aug" xml:space="preserve" approved="yes">
+                <source>Aug</source>
+                <target state="translated">Aug</target>
+            </trans-unit>
+            <trans-unit id="month.sep" xml:space="preserve" approved="yes">
+                <source>Sep</source>
+                <target state="translated">Sep</target>
+            </trans-unit>
+            <trans-unit id="month.oct" xml:space="preserve" approved="yes">
+                <source>Oct</source>
+                <target state="translated">Okt</target>
+            </trans-unit>
+            <trans-unit id="month.nov" xml:space="preserve" approved="yes">
+                <source>Nov</source>
+                <target state="translated">Nov</target>
+            </trans-unit>
+            <trans-unit id="month.dec" xml:space="preserve" approved="yes">
+                <source>Dec</source>
+                <target state="translated">Dez</target>
+            </trans-unit>
+
         </body>
     </file>
 </xliff>

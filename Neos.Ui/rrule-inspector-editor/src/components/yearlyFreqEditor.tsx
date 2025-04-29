@@ -10,10 +10,12 @@ import SetPosSelector from './setPosSelector';
 import MonthSelector from './monthSelector';
 import { updateRRuleYearFrequencyOptions } from '../utils/updateRRuleYearFrequencyOptions';
 import { getInitialYearFrequencyType } from '../utils/getInitialYearFrequencyType';
+import { useI18n } from '@sitegeist/groundhogday-neos-bridge';
 
 
 export const YearlyFreqEditor: React.FC<TabContentProps> = ({ rrule, onChange }) => {
     const [yearlyFreqType, setyearlyFreqType] = useState<YearlyFrequencyType>(getInitialYearFrequencyType(rrule));
+    const i18n = useI18n();
 
     const handleIntervalChange = (interval: number) => {
         const updatedRRule = new RRule({
@@ -26,10 +28,10 @@ export const YearlyFreqEditor: React.FC<TabContentProps> = ({ rrule, onChange })
     return (
         <Container>
             <Counter
-                prefix="Every"
+                prefix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.every')}
                 value={rrule.options.interval ?? 1}
                 onChange={handleIntervalChange}
-                suffix="Year(s)"
+                suffix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.years')}
             />
 
             <Tabs  
@@ -45,7 +47,7 @@ export const YearlyFreqEditor: React.FC<TabContentProps> = ({ rrule, onChange })
                 }}
             >
                 <Tabs.Panel
-                    title="By Month(s)"
+                    title={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.onMonths')}
                     id="bymonths"
                 >
                     <Container>
@@ -54,7 +56,7 @@ export const YearlyFreqEditor: React.FC<TabContentProps> = ({ rrule, onChange })
                     </Container>
                 </Tabs.Panel>
                 <Tabs.Panel
-                    title="On nth Day"
+                    title={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.onThe')}
                     id="bysetpos"
                 >
                     <Container>

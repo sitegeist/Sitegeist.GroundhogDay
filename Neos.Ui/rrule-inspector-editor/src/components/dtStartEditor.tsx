@@ -3,8 +3,11 @@ import { DateInput, Label } from '@neos-project/react-ui-components'
 import { RRule } from 'rrule'
 import { TabContentProps } from '../types'
 import { Container } from './container'
+import { useI18n } from '@sitegeist/groundhogday-neos-bridge'
 
 export const DTStartEditor: React.FC<TabContentProps> = ({ rrule, onChange }) => {
+    const i18n = useI18n()
+
     const handleDateChange = (date: Date | null) => {
         const validDate = date ?? new Date()
 
@@ -18,7 +21,7 @@ export const DTStartEditor: React.FC<TabContentProps> = ({ rrule, onChange }) =>
 
     return (
         <Container>
-            <Label>{'Beginn'}</Label>
+            <Label>{i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.start')}</Label>
             <DateInput
                 theme={{
                     'selectTodayBtn': 'select-tdy-btn'
@@ -27,7 +30,7 @@ export const DTStartEditor: React.FC<TabContentProps> = ({ rrule, onChange }) =>
                 value={rrule.options.dtstart ?? undefined}
                 labelFormat="DD. MMMM YYYY, HH:mm"
                 onChange={handleDateChange}
-                placeholder="Select a date"
+                placeholder={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.selectDate')}
             />
         </Container>
     )

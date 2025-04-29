@@ -1,7 +1,7 @@
 import { SynchronousRegistry } from '@neos-project/neos-ui-extensibility'
 import * as React from 'react'
-import { IGlobalRegistry } from './types'
 import { RRuleEditor } from './editors/RRuleEditor'
+import { IGlobalRegistry, NeosContext } from '@sitegeist/groundhogday-neos-bridge'
 
 export function registerRRulEditor(globalRegistry: IGlobalRegistry): void {
     const inspectorRegistry = globalRegistry.get('inspector')
@@ -22,7 +22,11 @@ export function registerRRulEditor(globalRegistry: IGlobalRegistry): void {
         component: (props: any) => {
             const { value, ...rest } = props
 
-            return <RRuleEditor {...rest} value={value} />
+            return (
+                <NeosContext.Provider value={{globalRegistry}}>
+                    <RRuleEditor {...rest} value={value} />
+                </NeosContext.Provider>
+            )
         },
     })
 }

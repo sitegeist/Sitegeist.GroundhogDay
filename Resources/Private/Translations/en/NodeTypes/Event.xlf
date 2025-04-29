@@ -8,6 +8,164 @@
             <trans-unit id="properties.recurrenceRule" xml:space="preserve" approved="yes">
                 <source>Recurrence rule</source>
             </trans-unit>
+
+            <!-- Inspector Editor -->
+            <trans-unit id="inspector.start" xml:space="preserve" approved="yes">
+                <source>Start</source>
+            </trans-unit>
+            <trans-unit id="inspector.selectDate" xml:space="preserve" approved="yes">
+                <source>Select a date</source>
+            </trans-unit>
+            <trans-unit id="inspector.start" xml:space="preserve" approved="yes">
+                <source>Start</source>
+            </trans-unit>
+            <trans-unit id="inspector.selectDate" xml:space="preserve" approved="yes">
+                <source>Select a date</source>
+            </trans-unit>
+            <trans-unit id="inspector.after" xml:space="preserve" approved="yes">
+                <source>After</source>
+            </trans-unit>
+            <trans-unit id="inspector.occurences" xml:space="preserve" approved="yes">
+                <source>occurences.</source>
+            </trans-unit>
+            <trans-unit id="inspector.onSelectedDates" xml:space="preserve" approved="yes">
+                <source>On selected dates:</source>
+            </trans-unit>
+            <trans-unit id="inspector.onSelectedDays" xml:space="preserve" approved="yes">
+                <source>On selected days:</source>
+            </trans-unit>
+            <trans-unit id="inspector.onSelectedMonths" xml:space="preserve" approved="yes">
+                <source>On selected months:</source>
+            </trans-unit>
+            <trans-unit id="inspector.every" xml:space="preserve" approved="yes">
+                <source>Every</source>
+            </trans-unit>
+            <trans-unit id="inspector.years" xml:space="preserve" approved="yes">
+                <source>Year(s)</source>
+            </trans-unit>
+            <trans-unit id="inspector.months" xml:space="preserve" approved="yes">
+                <source>Month(s)</source>
+            </trans-unit>
+            <trans-unit id="inspector.weeks" xml:space="preserve" approved="yes">
+                <source>Week(s)</source>
+            </trans-unit>
+            <trans-unit id="inspector.days" xml:space="preserve" approved="yes">
+                <source>Day(s)</source>
+            </trans-unit>
+            <trans-unit id="inspector.hours" xml:space="preserve" approved="yes">
+                <source>Hour(s)</source>
+            </trans-unit>
+            <trans-unit id="inspector.onThe" xml:space="preserve" approved="yes">
+                <source>On the</source>
+            </trans-unit>
+            <trans-unit id="inspector.repeat" xml:space="preserve" approved="yes">
+                <source>Repeat</source>
+            </trans-unit>
+            <trans-unit id="inspector.end" xml:space="preserve" approved="yes">
+                <source>End</source>
+            </trans-unit>
+            <trans-unit id="inspector.onDays" xml:space="preserve" approved="yes">
+                <source>On Day(s)</source>
+            </trans-unit>
+            <trans-unit id="inspector.onMonths" xml:space="preserve" approved="yes">
+                <source>On Month(s)</source>
+            </trans-unit>
+            <trans-unit id="end.never" xml:space="preserve" approved="yes">
+                <source>Never</source>
+            </trans-unit>
+            <trans-unit id="end.until" xml:space="preserve" approved="yes">
+                <source>Until Date</source>
+            </trans-unit>
+            <trans-unit id="end.count" xml:space="preserve" approved="yes">
+                <source>Occurences</source>
+            </trans-unit>
+            <trans-unit id="freq.yearly" xml:space="preserve" approved="yes">
+                <source>Yearly</source>
+            </trans-unit>
+            <trans-unit id="freq.monthly" xml:space="preserve" approved="yes">
+                <source>Monthly</source>
+            </trans-unit>
+            <trans-unit id="freq.weekly" xml:space="preserve" approved="yes">
+                <source>Weekly</source>
+            </trans-unit>
+            <trans-unit id="freq.daily" xml:space="preserve" approved="yes">
+                <source>Daily</source>
+            </trans-unit>
+            <trans-unit id="freq.hourly" xml:space="preserve" approved="yes">
+                <source>Hourly</source>
+            </trans-unit>
+            <trans-unit id="weekday.mo" xml:space="preserve" approved="yes">
+                <source>Mo</source>
+            </trans-unit>
+            <trans-unit id="weekday.tu" xml:space="preserve" approved="yes">
+                <source>Tu</source>
+            </trans-unit>
+            <trans-unit id="weekday.we" xml:space="preserve" approved="yes">
+                <source>We</source>
+            </trans-unit>
+            <trans-unit id="weekday.th" xml:space="preserve" approved="yes">
+                <source>Th</source>
+            </trans-unit>
+            <trans-unit id="weekday.fr" xml:space="preserve" approved="yes">
+                <source>Fr</source>
+            </trans-unit>
+            <trans-unit id="weekday.sa" xml:space="preserve" approved="yes">
+                <source>Sa</source>
+            </trans-unit>
+            <trans-unit id="weekday.su" xml:space="preserve" approved="yes">
+                <source>Su</source>
+            </trans-unit>
+            <trans-unit id="bySetPos.first" xml:space="preserve" approved="yes">
+                <source>First</source>
+            </trans-unit>
+            <trans-unit id="bySetPos.second" xml:space="preserve" approved="yes">
+                <source>Second</source>
+            </trans-unit>
+            <trans-unit id="bySetPos.third" xml:space="preserve" approved="yes">
+                <source>Third</source>
+            </trans-unit>
+            <trans-unit id="bySetPos.fourth" xml:space="preserve" approved="yes">
+                <source>Fourth</source>
+            </trans-unit>
+            <trans-unit id="bySetPos.last" xml:space="preserve" approved="yes">
+                <source>Last</source>
+            </trans-unit>
+            <trans-unit id="month.jan" xml:space="preserve" approved="yes">
+                <source>Jan</source>
+            </trans-unit>
+            <trans-unit id="month.feb" xml:space="preserve" approved="yes">
+                <source>Feb</source>
+            </trans-unit>
+            <trans-unit id="month.mar" xml:space="preserve" approved="yes">
+                <source>Mar</source>
+            </trans-unit>
+            <trans-unit id="month.apr" xml:space="preserve" approved="yes">
+                <source>Apr</source>
+            </trans-unit>
+            <trans-unit id="month.may" xml:space="preserve" approved="yes">
+                <source>May</source>
+            </trans-unit>
+            <trans-unit id="month.jun" xml:space="preserve" approved="yes">
+                <source>Jun</source>
+            </trans-unit>
+            <trans-unit id="month.jul" xml:space="preserve" approved="yes">
+                <source>Jul</source>
+            </trans-unit>
+            <trans-unit id="month.aug" xml:space="preserve" approved="yes">
+                <source>Aug</source>
+            </trans-unit>
+            <trans-unit id="month.sep" xml:space="preserve" approved="yes">
+                <source>Sep</source>
+            </trans-unit>
+            <trans-unit id="month.oct" xml:space="preserve" approved="yes">
+                <source>Oct</source>
+            </trans-unit>
+            <trans-unit id="month.nov" xml:space="preserve" approved="yes">
+                <source>Nov</source>
+            </trans-unit>
+            <trans-unit id="month.dec" xml:space="preserve" approved="yes">
+                <source>Dec</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

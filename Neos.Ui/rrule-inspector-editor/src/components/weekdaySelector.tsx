@@ -1,10 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { ByWeekday, RRule } from 'rrule';
-import { WEEKDAY_OPTIONS } from '../utils/constants';
+import { getWeekdayOptions } from '../utils/constants';
 import { TabContentProps } from '../types';
 import { Container } from './container';
 import { Label } from '@neos-project/react-ui-components';
+import { useI18n } from '@sitegeist/groundhogday-neos-bridge';
 
 const SelectedItemsContainer = styled.div`
     display: flex;
@@ -35,6 +36,7 @@ type WeekdaySelectorProps = {
 
 const WeekdaySelector: React.FC<WeekdaySelectorProps> = ({ hideLabel = false, rrule, onChange }) => {
     const weekdays: ByWeekday[] = rrule.options.byweekday;
+    const i18n = useI18n();
 
     const handleSelectChange = (weekday: ByWeekday) => {
         const currentWeekdays = weekdays || [];
@@ -53,9 +55,9 @@ const WeekdaySelector: React.FC<WeekdaySelectorProps> = ({ hideLabel = false, rr
 
     return (
         <Container>
-            {!hideLabel && <Label>On selected days:</Label>}
+            {!hideLabel && <Label>{i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.onSelectedDays')}</Label>}
             <SelectedItemsContainer>
-                {WEEKDAY_OPTIONS.map((option) => (
+                {getWeekdayOptions(i18n).map((option) => (
                     <SelectedItem
                         key={option.value}
                         selected={weekdays?.includes(option.value)}

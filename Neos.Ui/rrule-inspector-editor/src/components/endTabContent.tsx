@@ -5,11 +5,13 @@ import { RRuleEndType, TabContentProps } from '../types'
 import { Counter } from './counter'
 import { getInitialEndType } from '../utils/getInitialEndType'
 import { updateRRuleEndOptions } from '../utils/updateRRuleEndOptions'
-import { END_TYPE_OPTIONS } from '../utils/constants'
+import { getEndTypeOptions } from '../utils/constants'
 import { Container } from './container'
+import { useI18n } from '@sitegeist/groundhogday-neos-bridge'
 
 export const EndTabContent: React.FC<TabContentProps> = ({ rrule, onChange }) => {
     const [endType, setEndType] = useState<RRuleEndType>(getInitialEndType(rrule))
+    const i18n = useI18n()
 
     const handleUntilChange = (newDate: Date) => {
         const updatedRRule = new RRule({
@@ -33,7 +35,7 @@ export const EndTabContent: React.FC<TabContentProps> = ({ rrule, onChange }) =>
         <Container>
             <SelectBox
                 value={endType}
-                options={END_TYPE_OPTIONS}
+                options={getEndTypeOptions(i18n)}
                 onValueChange={(value: RRuleEndType) => {
                     setEndType(value)
                     onChange(updateRRuleEndOptions(rrule, value))
@@ -49,16 +51,16 @@ export const EndTabContent: React.FC<TabContentProps> = ({ rrule, onChange }) =>
                     value={rrule.options.until ?? undefined}
                     labelFormat="DD. MMMM YYYY HH:mm"
                     onChange={handleUntilChange}
-                    placeholder='Select a date'
+                    placeholder={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.selectDate')}
                 />
             )}
 
             {endType === 'count' && (
                 <Counter
-                    prefix={'After'}
+                    prefix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.after')}
                     value={rrule.options.count ?? 0}
                     onChange={handleCountChange}
-                    suffix={'occurences.'}
+                    suffix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.occurences')}
                 />
             )}
         </Container>

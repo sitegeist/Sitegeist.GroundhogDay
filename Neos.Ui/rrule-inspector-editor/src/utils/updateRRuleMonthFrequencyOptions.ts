@@ -8,7 +8,7 @@ export const updateRRuleMonthFrequencyOptions = (rrule: RRule, type: MonthFreque
         case MonthFrequencyType.BYMONTHDAY:
             return new RRule({ ...baseOptions, bymonthday: 1, bysetpos: null, byweekday: null })
         case MonthFrequencyType.BYSETPOS:
-            return new RRule({ ...baseOptions, bymonthday: null, bysetpos: 1, byweekday: 0 })
+            return new RRule({ ...baseOptions, bymonthday: null, bysetpos: 1, byweekday: null })
         default:
             return rrule
     }

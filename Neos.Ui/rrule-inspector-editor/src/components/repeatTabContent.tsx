@@ -7,8 +7,6 @@ import { Counter } from './counter'
 import WeekdaySelector from './weekdaySelector'
 import { Container } from './container'
 import { MonthFrequencyEditor } from './monthFrequencyEditor'
-import MonthSelector from './monthSelector'
-import MonthdaySelector from './monthDaySelector'
 import { YearlyFreqEditor } from './yearlyFreqEditor'
 
 export const RepeatTabContent: React.FC<TabContentProps> = ({ rrule, onChange }) => {
@@ -21,12 +19,18 @@ export const RepeatTabContent: React.FC<TabContentProps> = ({ rrule, onChange })
     }
 
     const handleFrequencyTypeChange = (frequency: Frequency) => {
+        if (rrule.options.freq === frequency) {
+            return;
+        }
+
         const updatedRRule = new RRule({
             ...rrule.options,
             freq: frequency,
             byweekday: undefined,
-            interval: undefined,
-            bymonthday: frequency === Frequency.MONTHLY ? 1 : undefined
+            interval: 1,
+            bymonthday: frequency === Frequency.MONTHLY ? 1 : undefined,
+            bymonth: undefined,
+            bysetpos: undefined
         })
         onChange(updatedRRule)
     }

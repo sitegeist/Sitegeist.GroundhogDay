@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { ByWeekday, RRule } from 'rrule';
 import { WEEKDAY_OPTIONS } from '../utils/constants';
@@ -29,7 +29,11 @@ const SelectedItem = styled.button<{ selected: boolean }>`
     }
 `;
 
-const WeekdaySelector: React.FC<TabContentProps> = ({ rrule, onChange }) => {
+type WeekdaySelectorProps = {
+    hideLabel?: boolean;
+} & TabContentProps
+
+const WeekdaySelector: React.FC<WeekdaySelectorProps> = ({ hideLabel = false, rrule, onChange }) => {
     const weekdays: ByWeekday[] = rrule.options.byweekday;
 
     const handleSelectChange = (weekday: ByWeekday) => {
@@ -49,7 +53,7 @@ const WeekdaySelector: React.FC<TabContentProps> = ({ rrule, onChange }) => {
 
     return (
         <Container>
-            <Label>On selected days:</Label>
+            {!hideLabel && <Label>On selected days:</Label>}
             <SelectedItemsContainer>
                 {WEEKDAY_OPTIONS.map((option) => (
                     <SelectedItem

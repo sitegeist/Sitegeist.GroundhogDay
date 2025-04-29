@@ -45,9 +45,9 @@ export const EndTabContent: React.FC<TabContentProps> = ({ rrule, onChange }) =>
                     theme={{
                         'selectTodayBtn': 'select-tdy-btn',
                     }}
-                    dateOnly={true}
+                    is24Hour
                     value={rrule.options.until ?? undefined}
-                    labelFormat="DD. MMMM YYYY"
+                    labelFormat="DD. MMMM YYYY HH:mm"
                     onChange={handleUntilChange}
                     placeholder='Select a date'
                 />

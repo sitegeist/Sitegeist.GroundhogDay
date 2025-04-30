@@ -14,6 +14,8 @@ use Neos\Neos\Domain\Service\ContentContextFactory;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceZookeeper;
 use Sitegeist\GroundhogDay\Domain\EventWasRemoved;
+use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceDatesAreChanged;
+use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceDatesWereChanged;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleIsChanged;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
 
@@ -27,7 +29,7 @@ class EventRelay
 {
     /**
      * @param array<string,string> $eventIdsToCheckForRemoval
-     * @param array<RecurrenceRuleWasChanged> $eventsToPublish
+     * @param array<RecurrenceRuleWasChanged|RecurrenceDatesWereChanged> $eventsToPublish
      */
     public function __construct(
         private readonly EventOccurrenceZookeeper $eventOccurrenceZookeeper,
@@ -67,6 +69,17 @@ class EventRelay
                     $newValue->recurrenceRule,
                     $newValue->startDate,
                     $newValue->endDate,
+                    new \DateTimeImmutable(),
+                );
+            }
+
+            if (RecurrenceDatesAreChanged::isSatisfiedByEventOccurrenceSpecifications($oldValue, $newValue)) {
+                $this->eventsToPublish[] = new RecurrenceDatesWereChanged(
+                    $this->resolveCalendarId($node),
+                    $node->getNodeAggregateIdentifier(),
+                    $newValue->startDate,
+                    $newValue->endDate,
+                    $newValue->recurrenceDates,
                     new \DateTimeImmutable(),
                 );
             }
@@ -124,7 +137,14 @@ class EventRelay
         }
 
         foreach ($this->eventsToPublish as $eventToPublish) {
-            $this->eventOccurrenceZookeeper->whenRecurrenceRuleWasChanged($eventToPublish);
+            switch (get_class($eventToPublish)) {
+                case RecurrenceRuleWasChanged::class:
+                    $this->eventOccurrenceZookeeper->whenRecurrenceRuleWasChanged($eventToPublish);
+                    break;
+                case RecurrenceDatesWereChanged::class:
+                    $this->eventOccurrenceZookeeper->whenRecurrenceDatesWereChanged($eventToPublish);
+                    break;
+            }
         }
     }
 }

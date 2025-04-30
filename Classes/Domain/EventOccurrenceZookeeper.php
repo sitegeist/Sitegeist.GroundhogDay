@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sitegeist\GroundhogDay\Domain;
 
 use Neos\Flow\Annotations as Flow;
+use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceDatesWereChanged;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
 
 /**
@@ -33,6 +34,22 @@ final class EventOccurrenceZookeeper
                 $event->startDate,
                 $event->endDate,
                 $event->dateOfChange
+            );
+        }
+    }
+
+    public function whenRecurrenceDatesWereChanged(RecurrenceDatesWereChanged $event): void
+    {
+        if ($event->changedDates === null) {
+            $this->eventOccurrenceRepository->removeAllFutureManualOccurrencesByEventId($event->eventId, $event->dateOfChange);
+        } else {
+            $this->eventOccurrenceRepository->replaceAllFutureManualOccurrencesByEventId(
+                $event->calendarId,
+                $event->eventId,
+                $event->changedDates,
+                $event->startDate,
+                $event->endDate,
+                $event->dateOfChange,
             );
         }
     }

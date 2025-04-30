@@ -18,6 +18,8 @@ use Sitegeist\GroundhogDay\Domain\EventOccurrenceRepository;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceZookeeper;
 use Sitegeist\GroundhogDay\Domain\EventWasRemoved;
+use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceDates;
+use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceDatesWereChanged;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
 use Sitegeist\GroundhogDay\Domain\TimeHasPassed;
@@ -728,6 +730,273 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
                 'startDate' => self::createDateTime('2025-05-01 14:30:00', true),
                 'recurrenceRule' => 'RRULE:FREQ=MONTHLY;BYMONTHDAY=1'
             ],
+        ];
+    }
+
+    /**
+     * @param iterable<RecurrenceDatesWereChanged> $previousEvents
+     * @param list<array{calendarId: NodeAggregateIdentifier, startDate: \DateTimeImmutable, endDate: \DateTimeImmutable, eventDates: list<EventOccurrence>}> $expectedEventDatesWithinPeriod
+     * @param list<array{eventId: NodeAggregateIdentifier, eventDates: list<EventOccurrence>}> $expectedEventDatesByEventId
+     * @dataProvider recurrenceDatesChangeProvider
+     */
+    public function testWhenRecurrenceDatesWereChanged(
+        array $previousEvents,
+        RecurrenceDatesWereChanged $event,
+        array $expectedEventDatesWithinPeriod,
+        array $expectedEventDatesByEventId,
+    ) {
+        $writeSubject = $this->objectManager->get(EventOccurrenceZookeeper::class);
+        $readSubject = $this->objectManager->get(EventOccurrenceRepository::class);
+        foreach ($previousEvents as $previousEvent) {
+            $writeSubject->whenRecurrenceDatesWereChanged($previousEvent);
+        }
+
+        $writeSubject->whenRecurrenceDatesWereChanged($event);
+
+        foreach ($expectedEventDatesWithinPeriod as $testRecord) {
+            $expected = $testRecord['eventDates'];
+            $actual = iterator_to_array($readSubject->findEventOccurrencesWithinPeriod($testRecord['calendarId'], $testRecord['startDate'], $testRecord['endDate']));
+            Assert::assertEquals(
+                $expected,
+                $actual,
+                'Expected occurrences ' . PHP_EOL . \json_encode($expected) . PHP_EOL
+                . ', got ' . PHP_EOL . \json_encode($actual) . PHP_EOL
+                . ' for range ' . $testRecord['startDate']->format('Y-m-d H:i:s') . ' to ' . $testRecord['endDate']->format('Y-m-d H:i:s'),
+            );
+        }
+
+        foreach ($expectedEventDatesByEventId as $testRecord) {
+            $expected = $testRecord['eventDates'];
+            $actual = iterator_to_array($readSubject->findEventOccurrencesByEventId($testRecord['eventId']));
+            Assert::assertEquals(
+                $expected,
+                $actual,
+                'Expected occurrences ' . PHP_EOL . \json_encode($expected) . PHP_EOL
+                . ', got ' . PHP_EOL . \json_encode($actual) . PHP_EOL
+                . ' for event ' . $testRecord['eventId'],
+            );
+        }
+    }
+
+    /**
+     * @return iterable<string,array{
+     *     previousEvents: array<RecurrenceDatesWereChanged>,
+     *     event: RecurrenceDatesWereChanged,
+     *     expectedEventDatesWithinPeriod: list<array{startDate: \DateTimeImmutable, endDate: \DateTimeImmutable, eventDates: list<EventOccurrence>}>,
+     *     expectedEventDatesByEventId: list<array{eventId: NodeAggregateIdentifier, eventDates: list<EventOccurrence>}>,
+     * }>
+     */
+    public static function recurrenceDatesChangeProvider(): iterable
+    {
+        yield 'single-day event, initial recurrence dates' => [
+            'previousEvents' => [],
+            'event' => new RecurrenceDatesWereChanged(
+                NodeAggregateIdentifier::fromString('my-calendar'),
+                NodeAggregateIdentifier::fromString('my-event'),
+                self::createDateTime('2025-04-30 14:30:00', true),
+                null,
+                RecurrenceDates::create(
+                    self::createDateTime('2025-05-02 14:30:00', true),
+                ),
+                self::createDateTime('2025-04-30 10:00:00'),
+            ),
+            'expectedEventDatesWithinPeriod' => [
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTime('2025-04-30 00:00:00', true),
+                    'endDate' => self::createDateTime('2025-05-01 00:00:00', true),
+                    'eventDates' => [
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                        )
+                    ]
+                ],
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTime('2025-04-30 00:00:00', true),
+                    'endDate' => self::createDateTime('2025-05-03 00:00:00', true),
+                    'eventDates' => [
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                        ),
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-05-02 14:30:00', true),
+                            self::createDateTime('2025-05-02 14:30:00', true),
+                        ),
+                    ]
+                ],
+            ],
+            'expectedEventDatesByEventId' => [
+                [
+                    'eventId' => NodeAggregateIdentifier::fromString('my-event'),
+                    'eventDates' => [
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                        ),
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-05-02 14:30:00', true),
+                            self::createDateTime('2025-05-02 14:30:00', true),
+                        ),
+                    ]
+                ]
+            ]
+        ];
+
+        yield 'single-day event, changed recurrence dates' => [
+            'previousEvents' => [
+                new RecurrenceDatesWereChanged(
+                    NodeAggregateIdentifier::fromString('my-calendar'),
+                    NodeAggregateIdentifier::fromString('my-event'),
+                    self::createDateTime('2025-04-30 14:30:00', true),
+                    null,
+                    RecurrenceDates::create(
+                        self::createDateTime('2025-05-02 14:30:00', true),
+                    ),
+                    self::createDateTime('2025-04-30 10:00:00'),
+                )
+            ],
+            'event' => new RecurrenceDatesWereChanged(
+                NodeAggregateIdentifier::fromString('my-calendar'),
+                NodeAggregateIdentifier::fromString('my-event'),
+                self::createDateTime('2025-04-30 14:30:00', true),
+                null,
+                RecurrenceDates::create(
+                    self::createDateTime('2025-05-02 15:30:00', true),
+                    self::createDateTime('2025-05-03 14:30:00', true),
+                ),
+                self::createDateTime('2025-04-30 11:00:00'),
+            ),
+            'expectedEventDatesWithinPeriod' => [
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTime('2025-04-30 00:00:00', true),
+                    'endDate' => self::createDateTime('2025-05-01 00:00:00', true),
+                    'eventDates' => [
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                        )
+                    ]
+                ],
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTime('2025-04-30 00:00:00', true),
+                    'endDate' => self::createDateTime('2025-05-03 00:00:00', true),
+                    'eventDates' => [
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                        ),
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-05-02 15:30:00', true),
+                            self::createDateTime('2025-05-02 15:30:00', true),
+                        ),
+                    ]
+                ],
+            ],
+            'expectedEventDatesByEventId' => [
+                [
+                    'eventId' => NodeAggregateIdentifier::fromString('my-event'),
+                    'eventDates' => [
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                        ),
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-05-02 15:30:00', true),
+                            self::createDateTime('2025-05-02 15:30:00', true),
+                        ),
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-05-03 14:30:00', true),
+                            self::createDateTime('2025-05-03 14:30:00', true),
+                        ),
+                    ]
+                ]
+            ]
+        ];
+
+        yield 'single-day event, removed recurrence dates' => [
+            'previousEvents' => [
+                new RecurrenceDatesWereChanged(
+                    NodeAggregateIdentifier::fromString('my-calendar'),
+                    NodeAggregateIdentifier::fromString('my-event'),
+                    self::createDateTime('2025-04-30 14:30:00', true),
+                    null,
+                    RecurrenceDates::create(
+                        self::createDateTime('2025-05-02 14:30:00', true),
+                        self::createDateTime('2025-05-04 14:30:00', true),
+                    ),
+                    self::createDateTime('2025-04-30 10:00:00'),
+                )
+            ],
+            'event' => new RecurrenceDatesWereChanged(
+                NodeAggregateIdentifier::fromString('my-calendar'),
+                NodeAggregateIdentifier::fromString('my-event'),
+                self::createDateTime('2025-04-30 14:30:00', true),
+                null,
+                null,
+                self::createDateTime('2025-05-03 11:00:00'),
+            ),
+            'expectedEventDatesWithinPeriod' => [
+                [
+                    'startDate' => self::createDateTime('2025-04-30 00:00:00', true),
+                    'endDate' => self::createDateTime('2025-05-01 00:00:00', true),
+                    'eventDates' => [
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                        )
+                    ]
+                ],
+                [
+                    'startDate' => self::createDateTime('2025-04-30 00:00:00', true),
+                    'endDate' => self::createDateTime('2025-05-03 23:59:59', true),
+                    'eventDates' => [
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                        ),
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-05-02 15:30:00', true),
+                            self::createDateTime('2025-05-02 15:30:00', true),
+                        ),
+                    ]
+                ],
+            ],
+            'expectedEventDatesByEventId' => [
+                [
+                    'eventId' => NodeAggregateIdentifier::fromString('my-event'),
+                    'eventDates' => [
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                            self::createDateTime('2025-04-30 14:30:00', true),
+                        ),
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTime('2025-05-02 15:30:00', true),
+                            self::createDateTime('2025-05-02 15:30:00', true),
+                        ),
+                    ]
+                ]
+            ]
         ];
     }
 

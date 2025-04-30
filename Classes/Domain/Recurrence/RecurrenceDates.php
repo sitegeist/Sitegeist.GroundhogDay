@@ -27,6 +27,11 @@ final readonly class RecurrenceDates implements \JsonSerializable, \Stringable, 
         return new self(...$items);
     }
 
+    public function isEmpty(): bool
+    {
+        return empty($this->items);
+    }
+
     /**
      * @return \Traversable<int,\DateTimeImmutable>
      */

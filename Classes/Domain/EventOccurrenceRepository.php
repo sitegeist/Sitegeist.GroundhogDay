@@ -16,6 +16,7 @@ use Recurr\Rule;
 use Recurr\Transformer\ArrayTransformer;
 use Recurr\Transformer\Constraint\BeforeConstraint;
 use Recurr\Transformer\Constraint\BetweenConstraint;
+use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceDates;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
 
 /**
@@ -118,6 +119,18 @@ final class EventOccurrenceRepository
                 'eventId' => (string)$eventId,
                 'referenceDate' => $referenceDate->format(self::DATE_FORMAT),
                 'source' => EventOccurrenceSource::SOURCE_RECURRENCE_RULE->value,
+            ]
+        );
+    }
+
+    public function removeAllFutureManualOccurrencesByEventId(NodeAggregateIdentifier $eventId, \DateTimeImmutable $referenceDate): void
+    {
+        $this->databaseConnection->executeStatement(
+            'DELETE FROM ' . self::TABLE_NAME . ' WHERE event_id = :eventId AND end_date > :referenceDate AND source = :source',
+            [
+                'eventId' => (string)$eventId,
+                'referenceDate' => $referenceDate->format(self::DATE_FORMAT),
+                'source' => EventOccurrenceSource::SOURCE_RECURRENCE_DATE->value,
             ]
         );
     }
@@ -240,6 +253,41 @@ final class EventOccurrenceRepository
                 }
             }
         }
+    }
+
+    public function replaceAllFutureManualOccurrencesByEventId(
+        NodeAggregateIdentifier $eventId,
+        NodeAggregateIdentifier $calendarId,
+        RecurrenceDates $recurrenceDates,
+        \DateTimeImmutable $startDate,
+        ?\DateTimeImmutable $endDate,
+        \DateTimeImmutable $referenceDate,
+    ) {
+        $this->databaseConnection->transactional(function () use ($calendarId, $eventId, $referenceDate, $recurrenceDates, $startDate, $endDate) {
+            $this->removeAllFutureManualOccurrencesByEventId($eventId, $referenceDate);
+
+            $difference = $endDate?->diff($startDate);
+            foreach ($recurrenceDates as $recurrenceDate) {
+                if ($recurrenceDate < $referenceDate) {
+                    continue;
+                }
+                $recurrenceStartDate = $recurrenceDate;
+                /** @todo implement proper date object */
+                if ($recurrenceDate->format('H:i:s') === '00:00:00') {
+                    $recurrenceStartDate = $recurrenceStartDate->setTime((int)$startDate->format('H'), (int)$startDate->format('i'), (int)$startDate->format('s'));
+                }
+                $this->databaseConnection->insert(
+                    self::TABLE_NAME,
+                    [
+                        'calendar_id' => (string)$calendarId,
+                        'event_id' => (string)$eventId,
+                        'start_date' => $recurrenceStartDate->format(self::DATE_FORMAT),
+                        'end_date' => ($difference ? $recurrenceStartDate->add($difference) : $recurrenceStartDate)->format(self::DATE_FORMAT),
+                        'source' => EventOccurrenceSource::SOURCE_RECURRENCE_RULE->value,
+                    ]
+                );
+            }
+        });
     }
 
     /**

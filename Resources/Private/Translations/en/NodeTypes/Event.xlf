@@ -5,8 +5,8 @@
             <trans-unit id="groups.event" xml:space="preserve" approved="yes">
                 <source>Event</source>
             </trans-unit>
-            <trans-unit id="properties.recurrenceRule" xml:space="preserve" approved="yes">
-                <source>Recurrence rule</source>
+            <trans-unit id="properties.occurrence" xml:space="preserve" approved="yes">
+                <source>Occurrence</source>
             </trans-unit>
 
             <!-- Inspector Editor -->

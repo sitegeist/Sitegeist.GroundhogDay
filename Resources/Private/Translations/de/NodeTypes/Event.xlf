@@ -6,9 +6,9 @@
                 <source>Event</source>
                 <target state="translated">Veranstaltung</target>
             </trans-unit>
-            <trans-unit id="properties.recurrenceRule" xml:space="preserve" approved="yes">
-                <source>Recurrence rule</source>
-                <target state="translated">Wiederholungsregel</target>
+            <trans-unit id="properties.occurrence" xml:space="preserve" approved="yes">
+                <source>Occurrence</source>
+                <target state="translated">Vorkommen</target>
             </trans-unit>
 
             <!-- Inspector Editor -->

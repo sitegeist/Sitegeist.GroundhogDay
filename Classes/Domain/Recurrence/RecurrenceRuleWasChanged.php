@@ -17,6 +17,8 @@ final readonly class RecurrenceRuleWasChanged
         public NodeAggregateIdentifier $calendarId,
         public NodeAggregateIdentifier $eventId,
         public ?RecurrenceRule $changedRule,
+        public \DateTimeImmutable $startDate,
+        public ?\DateTimeImmutable $endDate,
         public \DateTimeImmutable $dateOfChange,
     ) {
     }

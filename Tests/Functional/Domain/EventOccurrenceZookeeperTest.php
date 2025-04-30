@@ -15,6 +15,7 @@ use Neos\Flow\Tests\FunctionalTestCase;
 use PHPUnit\Framework\Assert;
 use Sitegeist\GroundhogDay\Domain\EventOccurrence;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceRepository;
+use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceZookeeper;
 use Sitegeist\GroundhogDay\Domain\EventWasRemoved;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
@@ -35,7 +36,7 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
      * @param iterable<RecurrenceRuleWasChanged> $previousEvents
      * @param list<array{calendarId: NodeAggregateIdentifier, startDate: \DateTimeImmutable, endDate: \DateTimeImmutable, eventDates: list<EventOccurrence>}> $expectedEventDatesWithinPeriod
      * @param list<array{eventId: NodeAggregateIdentifier, eventDates: list<EventOccurrence>}> $expectedEventDatesByEventId
-     * @param array{identifier: string, recurrenceRule: string}|null $requiredNodeData
+     * @param array{identifier: string, recurrenceRule: string, startDate: \DateTimeImmutable}|null $requiredNodeData
      * @dataProvider recurrenceRuleChangeProvider
      */
     public function testWhenRecurrenceRuleWasChanged(
@@ -53,7 +54,12 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
 
             $nodeTypeManager = $this->objectManager->get(NodeTypeManager::class);
             $nodeData = new NodeData('/i/dont/care', $workspace, $requiredNodeData['identifier']);
-            $nodeData->setProperty('recurrenceRule', RecurrenceRule::fromString($requiredNodeData['recurrenceRule']));
+            $nodeData->setProperty('occurrence', new EventOccurrenceSpecification(
+                $requiredNodeData['startDate'],
+                null,
+                RecurrenceRule::fromString($requiredNodeData['recurrenceRule']),
+                null,
+            ));
             $nodeData->setNodeType($nodeTypeManager->getNodeType('Sitegeist.GroundhogDay:Document.Event'));
             $persistenceManager->persistAll();
         }
@@ -110,8 +116,9 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
             'event' => new RecurrenceRuleWasChanged(
                 NodeAggregateIdentifier::fromString('my-calendar'),
                 NodeAggregateIdentifier::fromString('my-event'),
-                RecurrenceRule::fromString('DTSTART;TZID=Europe/Berlin:20250424T143000
-RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
+                RecurrenceRule::fromString('RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
+                self::createDateTime('2025-04-24 14:30:00', true),
+                null,
                 self::createDateTime('2025-04-24 00:00:00'),
             ),
             'expectedEventDatesWithinPeriod' => [
@@ -202,16 +209,18 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
                 new RecurrenceRuleWasChanged(
                     NodeAggregateIdentifier::fromString('my-calendar'),
                     NodeAggregateIdentifier::fromString('my-event'),
-                    RecurrenceRule::fromString('DTSTART;TZID=Europe/Berlin:20250424T143000
-RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
+                    RecurrenceRule::fromString('RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
+                    self::createDateTime('2025-04-24 14:30:00', true),
+                    null,
                     self::createDateTime('2025-04-24 00:00:00'),
                 )
             ],
             'event' => new RecurrenceRuleWasChanged(
                 NodeAggregateIdentifier::fromString('my-calendar'),
                 NodeAggregateIdentifier::fromString('my-event'),
-                RecurrenceRule::fromString('DTSTART;TZID=Europe/Berlin:20250424T150000
-RRULE:FREQ=DAILY;INTERVAL=7;COUNT=5'),
+                RecurrenceRule::fromString('RRULE:FREQ=DAILY;INTERVAL=7;COUNT=5'),
+                self::createDateTime('2025-04-24 15:00:00', true),
+                null,
                 self::createDateTime('2025-05-14 14:00:00'),
             ),
             'expectedEventDatesWithinPeriod' => [
@@ -297,14 +306,17 @@ RRULE:FREQ=DAILY;INTERVAL=7;COUNT=5'),
                 new RecurrenceRuleWasChanged(
                     NodeAggregateIdentifier::fromString('my-calendar'),
                     NodeAggregateIdentifier::fromString('my-event'),
-                    RecurrenceRule::fromString('DTSTART;TZID=Europe/Berlin:20250424T143000
-RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
+                    RecurrenceRule::fromString('RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
+                    self::createDateTime('2025-04-24 14:30:00', true),
+                    null,
                     self::createDateTime('2025-04-24 00:00:00'),
                 )
             ],
             'event' => new RecurrenceRuleWasChanged(
                 NodeAggregateIdentifier::fromString('my-calendar'),
                 NodeAggregateIdentifier::fromString('my-event'),
+                null,
+                self::createDateTime('2025-04-24 14:30:00', true),
                 null,
                 self::createDateTime('2025-05-14 14:00:00'),
             ),
@@ -364,8 +376,9 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
                 new RecurrenceRuleWasChanged(
                     NodeAggregateIdentifier::fromString('my-calendar'),
                     NodeAggregateIdentifier::fromString('my-event'),
-                    RecurrenceRule::fromString('DTSTART;TZID=Europe/Berlin:20250424T143000
-RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
+                    RecurrenceRule::fromString('RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
+                    self::createDateTime('2025-04-24 14:30:00', true),
+                    null,
                     self::createDateTime('2025-04-24 00:00:00'),
                 )
             ],
@@ -405,8 +418,9 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
             'event' => new RecurrenceRuleWasChanged(
                 NodeAggregateIdentifier::fromString('my-calendar'),
                 NodeAggregateIdentifier::fromString('my-event'),
-                RecurrenceRule::fromString('DTSTART;TZID=Europe/Berlin:20250501T143000
-RRULE:FREQ=MONTHLY;BYMONTHDAY=1'),
+                RecurrenceRule::fromString('RRULE:FREQ=MONTHLY;BYMONTHDAY=1'),
+                self::createDateTime('2025-05-01 14:30:00', true),
+                null,
                 self::createDateTime('2025-04-24 00:00:00'),
             ),
             'expectedEventDatesWithinPeriod' => [
@@ -532,8 +546,9 @@ RRULE:FREQ=MONTHLY;BYMONTHDAY=1'),
                 new RecurrenceRuleWasChanged(
                     NodeAggregateIdentifier::fromString('my-calendar'),
                     NodeAggregateIdentifier::fromString('my-event'),
-                    RecurrenceRule::fromString('DTSTART;TZID=Europe/Berlin:20250501T143000
-RRULE:FREQ=MONTHLY;BYMONTHDAY=1'),
+                    RecurrenceRule::fromString('RRULE:FREQ=MONTHLY;BYMONTHDAY=1'),
+                    self::createDateTime('2025-05-01 14:30:00'),
+                    null,
                     self::createDateTime('2025-04-24 00:00:00'),
                 )
             ],
@@ -710,15 +725,15 @@ RRULE:FREQ=MONTHLY;BYMONTHDAY=1'),
             ],
             'requiredNodeData' => [
                 'identifier' => 'my-event',
-                'recurrenceRule' => 'DTSTART;TZID=Europe/Berlin:20250501T143000
-RRULE:FREQ=MONTHLY;BYMONTHDAY=1'
+                'startDate' => self::createDateTime('2025-05-01 14:30:00', true),
+                'recurrenceRule' => 'RRULE:FREQ=MONTHLY;BYMONTHDAY=1'
             ],
         ];
     }
 
-    private static function createDateTime(string $date): \DateTimeImmutable
+    private static function createDateTime(string $date, bool $inBerlin = false): \DateTimeImmutable
     {
-        return \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $date);
+        return \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $date, $inBerlin ? new \DateTimeZone('Europe/Berlin') : null);
     }
 
     private function setUpPersistence(): void

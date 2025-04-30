@@ -11,9 +11,10 @@ use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
 use Neos\ContentRepository\Exception\NodeException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Neos\Domain\Service\ContentContextFactory;
+use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceZookeeper;
 use Sitegeist\GroundhogDay\Domain\EventWasRemoved;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
+use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleIsChanged;
 use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
 
 /**
@@ -44,25 +45,28 @@ class EventRelay
             && $node->getNodeType()->isOfType('Sitegeist.GroundhogDay:Mixin.Event')
             && !$node->isRemoved() // removal is handled in ::afterNodeWasPublished
         ) {
-            $newValue = $node->getProperty('recurrenceRule');
+            $newValue = $node->getProperty('occurrence');
+            if (!$newValue instanceof EventOccurrenceSpecification) {
+                return;
+            }
 
-            $newComparisonValue = $newValue instanceof RecurrenceRule ? $newValue->toString() : null;
-            $oldComparisonValue = null;
-
+            $oldValue = null;
             $liveContextProperties = $node->getContext()->getProperties();
             $liveContextProperties['workspaceName'] = 'live';
             $liveContext = $this->contentContextFactory->create($liveContextProperties);
             $liveEvent = $liveContext->getNodeByIdentifier($node->getIdentifier());
             if ($liveEvent) {
-                $oldValue = $liveEvent->getProperty('recurrenceRule');
-                $oldComparisonValue = $oldValue instanceof RecurrenceRule ? $oldValue->toString() : null;
+                $oldValue = $liveEvent->getProperty('occurrence');
+                $oldValue = $oldValue instanceof EventOccurrenceSpecification ? $oldValue : null;
             }
 
-            if ($oldComparisonValue !== $newComparisonValue) {
+            if (RecurrenceRuleIsChanged::isSatisfiedByEventOccurrenceSpecifications($oldValue, $newValue)) {
                 $this->eventsToPublish[] = new RecurrenceRuleWasChanged(
                     $this->resolveCalendarId($node),
                     $node->getNodeAggregateIdentifier(),
-                    $newValue,
+                    $newValue->recurrenceRule,
+                    $newValue->startDate,
+                    $newValue->endDate,
                     new \DateTimeImmutable(),
                 );
             }

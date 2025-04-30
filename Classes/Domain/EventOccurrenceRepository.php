@@ -126,13 +126,15 @@ final class EventOccurrenceRepository
         NodeAggregateIdentifier $calendarId,
         NodeAggregateIdentifier $eventId,
         RecurrenceRule $recurrenceRule,
+        \DateTimeImmutable $startDate,
+        ?\DateTimeImmutable $endDate,
         \DateTimeImmutable $referenceDate
     ): void {
         $renderer = new ArrayTransformer();
         /** @var list<EventOccurrence> $futureDates */
         $futureDates = [];
 
-        $rule = new Rule($recurrenceRule->value);
+        $rule = new Rule($recurrenceRule->value, $startDate, $endDate);
         foreach (
             $renderer->transform(
                 $rule,
@@ -186,9 +188,13 @@ final class EventOccurrenceRepository
         $renderer = new ArrayTransformer();
         /** @var iterable<NodeData> $nodeDataRecords */
         foreach ($nodeDataRecords as $nodeDataRecord) {
-            $recurrenceRule = $nodeDataRecord->getProperty('recurrenceRule');
-            if ($recurrenceRule instanceof RecurrenceRule) {
-                $rule = new Rule($recurrenceRule->value);
+            $occurrenceSpecification = $nodeDataRecord->getProperty('occurrence');
+            if ($occurrenceSpecification instanceof EventOccurrenceSpecification && $occurrenceSpecification->recurrenceRule !== null) {
+                $rule = new Rule(
+                    $occurrenceSpecification->recurrenceRule->value,
+                    $occurrenceSpecification->startDate,
+                    $occurrenceSpecification->endDate,
+                );
                 if (!$rule->getEndDate()) {
                     $eventId = NodeAggregateIdentifier::fromString($nodeDataRecord->getIdentifier());
                     /** @var list<EventOccurrence> $futureDates */

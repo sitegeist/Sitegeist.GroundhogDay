@@ -8,8 +8,8 @@
         event:
           label: i18n
   properties:
-    recurrenceRule:
-      type: Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule
+    occurrence:
+      type: Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification
       ui:
         reloadIfChanged: true
         label: i18n

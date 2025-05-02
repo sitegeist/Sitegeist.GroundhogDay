@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { DateInput, SelectBox } from '@neos-project/react-ui-components'
 import { RRule } from 'rrule'
-import { RRuleEndType, TabContentProps } from '../types'
+import { RRuleEndType, RRuleEditorComponentProps } from '../types'
 import { Counter } from './counter'
 import { getInitialEndType } from '../utils/getInitialEndType'
 import { updateRRuleEndOptions } from '../utils/updateRRuleEndOptions'
@@ -9,7 +9,7 @@ import { getEndTypeOptions } from '../utils/constants'
 import { Container } from './container'
 import { useI18n } from '@sitegeist/groundhogday-neos-bridge'
 
-export const EndTabContent: React.FC<TabContentProps> = ({ rrule, onChange }) => {
+export const EndTabContent: React.FC<RRuleEditorComponentProps> = ({ rrule, onChange }) => {
     const [endType, setEndType] = useState<RRuleEndType>(getInitialEndType(rrule))
     const i18n = useI18n()
 

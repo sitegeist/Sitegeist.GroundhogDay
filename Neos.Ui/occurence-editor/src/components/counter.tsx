@@ -1,5 +1,5 @@
 import React from 'react'
-import { TextInput, IconButton, Label } from '@neos-project/react-ui-components'
+import { TextInput, IconButton } from '@neos-project/react-ui-components'
 import styled from 'styled-components';
 import { SmallLabel } from './smallLabel';
 

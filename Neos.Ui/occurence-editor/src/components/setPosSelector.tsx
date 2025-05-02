@@ -1,13 +1,13 @@
 import React from 'react';
 import { RRule } from 'rrule';
-import { TabContentProps } from '../types';
+import { RRuleEditorComponentProps } from '../types';
 import { Container } from './container';
 import { Label, SelectBox } from '@neos-project/react-ui-components';
 import { getBySetPosOptions } from '../utils/constants';
 import WeekdaySelector from './weekdaySelector';
 import { useI18n } from '@sitegeist/groundhogday-neos-bridge';
 
-const SetPosSelector: React.FC<TabContentProps> = ({ rrule, onChange }) => {
+const SetPosSelector: React.FC<RRuleEditorComponentProps> = ({ rrule, onChange }) => {
     const i18n = useI18n();
 
     const handleSetPosChange = (value: number) => {

@@ -20,6 +20,14 @@
                 <source>Select a date</source>
                 <target state="translated">Datum auswählen</target>
             </trans-unit>
+            <trans-unit id="inspector.selectStartDate" xml:space="preserve" approved="yes">
+                <source>Select a start date</source>
+                <target state="translated">Startdatum auswählen</target>
+            </trans-unit>
+            <trans-unit id="inspector.selectEndDate" xml:space="preserve" approved="yes">
+                <source>Select a end date</source>
+                <target state="translated">Enddatum auswählen</target>
+            </trans-unit>
             <trans-unit id="inspector.after" xml:space="preserve" approved="yes">
                 <source>After</source>
                 <target state="translated">Nach</target>
@@ -212,7 +220,14 @@
                 <source>Dec</source>
                 <target state="translated">Dez</target>
             </trans-unit>
-
+            <trans-unit id="occurence.rrule" xml:space="preserve" approved="yes">
+                <source>Recurrence Rule</source>
+                <target state="translated">Wiederholungsregel</target>
+            </trans-unit>
+            <trans-unit id="occurence.manual" xml:space="preserve" approved="yes">
+                <source>Manual</source>
+                <target state="translated">Manuell</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

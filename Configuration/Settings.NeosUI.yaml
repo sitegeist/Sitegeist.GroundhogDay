@@ -6,9 +6,9 @@ Neos:
           'Sitegeist.GroundhogDay': ['NodeTypes/*']
       inspector:
         dataTypes:
-          'Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule':
+          'Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification':
             defaultValue: null
-            editor: 'Sitegeist.Groundhogday/Inspector/Editors/RRuleEditor'
+            editor: 'Sitegeist.Groundhogday/Inspector/Editors/OccurenceEditor'
     Ui:
       resources:
         javascript:

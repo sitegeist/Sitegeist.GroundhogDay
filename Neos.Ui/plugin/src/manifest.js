@@ -1,6 +1,6 @@
 import manifest from '@neos-project/neos-ui-extensibility'
-import { registerRRulEditor } from '../../rrule-inspector-editor/src'
+import { registerOccurenceEditor } from '@sitegeist/groundhogday-occurence-editor'
 
 manifest('@sitegeist/groundhogday', {}, (globalRegistry) => {
-    registerRRulEditor(globalRegistry)
+    registerOccurenceEditor(globalRegistry)
 })

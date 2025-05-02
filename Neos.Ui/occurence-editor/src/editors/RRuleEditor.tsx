@@ -1,35 +1,33 @@
 import React, { useState, useEffect } from 'react'
-import { EditorContainer } from '../components/container'
-import { RRuleEditorProps, RRuleEndType, RRuleTab } from '../types'
+import { Container } from '../components/container'
+import { RRuleTab } from '../types'
 import { RRule } from 'rrule'
 import { Tabs } from '@neos-project/react-ui-components'
 import { RepeatTabContent } from '../components/repeatTabContent'
 import { EndTabContent } from '../components/endTabContent'
-import { useExternalRRule } from '../hooks/useExternalRRule'
-import { DTStartEditor } from '../components/dtStartEditor'
 import { useI18n } from '@sitegeist/groundhogday-neos-bridge'
+import { useOccurence } from '../context/OccurenceContext'
 
-export const RRuleEditor: React.FC<RRuleEditorProps<string>> = ({ value, commit }) => {
-    const externalValue: RRule = useExternalRRule(value);
+export const RRuleEditor = () => {
+    const { occurence, setRRule } = useOccurence();
     const i18n = useI18n();
 
-    const [rrule, setRRule] = useState<RRule>(externalValue)
     const [activeTab, setActiveTab] = useState<RRuleTab>('repeat')
 
     const handleRRuleChange = (updatedRule: RRule) => {
         setRRule(new RRule({
             ...updatedRule.options,
-            byhour: undefined,
-            byminute: undefined,
-            bysecond: undefined,
-            wkst: undefined
+            byhour: null,
+            byminute: null,
+            bysecond: null,
+            wkst: null
         }))
-        commit(updatedRule.toString())
     }
 
+    if (!occurence.recurrenceRule) return null;
+
     return (
-        <EditorContainer>
-            <DTStartEditor rrule={rrule} onChange={handleRRuleChange} />
+        <Container>
             <Tabs  
                 activeTab={activeTab}
                 onActiveTabChange={(id: RRuleTab) => setActiveTab(id)}
@@ -44,7 +42,7 @@ export const RRuleEditor: React.FC<RRuleEditorProps<string>> = ({ value, commit 
                     id="repeat"
                 >
                     <RepeatTabContent
-                        rrule={rrule}
+                        rrule={occurence.recurrenceRule}
                         onChange={handleRRuleChange}
                     />
                 </Tabs.Panel>
@@ -53,11 +51,11 @@ export const RRuleEditor: React.FC<RRuleEditorProps<string>> = ({ value, commit 
                     id="end"
                 >
                     <EndTabContent
-                        rrule={rrule} 
+                        rrule={occurence.recurrenceRule} 
                         onChange={handleRRuleChange} 
                     />
                 </Tabs.Panel>
             </Tabs>
-        </EditorContainer>
+        </Container>
     )
 }

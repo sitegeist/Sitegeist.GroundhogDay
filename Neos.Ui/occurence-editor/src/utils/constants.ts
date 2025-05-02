@@ -4,6 +4,12 @@ export type I18nFn = (key: string) => string;
 
 const BASE = 'Sitegeist.GroundhogDay:NodeTypes.Mixin.Event';
 
+export const getOccurenceMethodOptions = (i18n: I18nFn) => [
+    { label: i18n(`${BASE}:end.never`), value: 'never' },
+    { label: i18n(`${BASE}:occurence.rrule`), value: 'rrule' },
+    { label: i18n(`${BASE}:occurence.manual`), value: 'manual' }
+]
+
 export const getEndTypeOptions = (i18n: I18nFn) => [
     { label: i18n(`${BASE}:end.never`), value: 'never', icon: 'infinity' },
     { label: i18n(`${BASE}:end.until`), value: 'until', icon: 'calendar-week' },

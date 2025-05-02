@@ -1,10 +1,11 @@
 {
-    "name": "@sitegeist/groundhogday-rrule-inspector-editor",
+    "name": "@sitegeist/groundhogday-occurence-editor",
     "license": "MIT",
     "version": "",
-    "main": "./src/index.ts",
+    "main": "./src/index.tsx",
     "dependencies": {
         "@neos-project/react-ui-components": "~8.3.0",
+        "@sitegeist/groundhogday-multi-date-input": "workspace:*",
         "@sitegeist/groundhogday-neos-bridge": "workspace:*",
         "date-fns": "4.1.0",
         "react": "^17.0.2",

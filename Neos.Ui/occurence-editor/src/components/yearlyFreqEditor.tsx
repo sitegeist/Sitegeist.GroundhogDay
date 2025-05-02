@@ -1,19 +1,20 @@
 import React from 'react'
 import { useState } from 'react';
 import { RRule } from 'rrule';
-import { MonthFrequencyType, TabContentProps } from '../types';
+import { RRuleEditorComponentProps, YearlyFrequencyType } from '../types';
 import { Counter } from './counter';
 import { Container } from './container';
 import { Tabs } from '@neos-project/react-ui-components';
 import MonthdaySelector from './monthDaySelector';
-import { getInitialMonthFrequencyType } from '../utils/getInitialMonthFrequencyType';
 import SetPosSelector from './setPosSelector';
-import { updateRRuleMonthFrequencyOptions } from '../utils/updateRRuleMonthFrequencyOptions';
+import MonthSelector from './monthSelector';
+import { updateRRuleYearFrequencyOptions } from '../utils/updateRRuleYearFrequencyOptions';
+import { getInitialYearFrequencyType } from '../utils/getInitialYearFrequencyType';
 import { useI18n } from '@sitegeist/groundhogday-neos-bridge';
 
 
-export const MonthFrequencyEditor: React.FC<TabContentProps> = ({ rrule, onChange }) => {
-    const [freqMonthType, setFreqMonthType] = useState<MonthFrequencyType>(getInitialMonthFrequencyType(rrule));
+export const YearlyFreqEditor: React.FC<RRuleEditorComponentProps> = ({ rrule, onChange }) => {
+    const [yearlyFreqType, setyearlyFreqType] = useState<YearlyFrequencyType>(getInitialYearFrequencyType(rrule));
     const i18n = useI18n();
 
     const handleIntervalChange = (interval: number) => {
@@ -30,14 +31,14 @@ export const MonthFrequencyEditor: React.FC<TabContentProps> = ({ rrule, onChang
                 prefix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.every')}
                 value={rrule.options.interval ?? 1}
                 onChange={handleIntervalChange}
-                suffix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.months')}
+                suffix={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.years')}
             />
 
             <Tabs  
-                activeTab={freqMonthType}
-                onActiveTabChange={(type: MonthFrequencyType) => {
-                    setFreqMonthType(type)
-                    onChange(updateRRuleMonthFrequencyOptions(rrule, type))
+                activeTab={yearlyFreqType}
+                onActiveTabChange={(type: YearlyFrequencyType) => {
+                    setyearlyFreqType(type)
+                    onChange(updateRRuleYearFrequencyOptions(rrule, type))
                 }}
                 theme={{
                     'tabNavigation__item': 'tabs-nav-item',
@@ -46,16 +47,22 @@ export const MonthFrequencyEditor: React.FC<TabContentProps> = ({ rrule, onChang
                 }}
             >
                 <Tabs.Panel
-                    title={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.onDays')}
-                    id="bymonthday"
+                    title={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.onMonths')}
+                    id="bymonths"
                 >
-                    <MonthdaySelector rrule={rrule} onChange={onChange} />
+                    <Container>
+                        <MonthSelector rrule={rrule} onChange={onChange} />
+                        <MonthdaySelector rrule={rrule} onChange={onChange} />
+                    </Container>
                 </Tabs.Panel>
                 <Tabs.Panel
                     title={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.onThe')}
                     id="bysetpos"
                 >
-                    <SetPosSelector rrule={rrule} onChange={onChange} />
+                    <Container>
+                        <SetPosSelector rrule={rrule} onChange={onChange} />
+                        <MonthSelector rrule={rrule} onChange={onChange} />
+                    </Container>
                 </Tabs.Panel>
             </Tabs>
         </Container>

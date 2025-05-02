@@ -1,6 +1,6 @@
 import React from 'react'
 import { Frequency, RRule } from 'rrule'
-import { TabContentProps } from '../types'
+import { RRuleEditorComponentProps } from '../types'
 import { SelectBox } from '@neos-project/react-ui-components'
 import { getFreqTypeOptions } from '../utils/constants'
 import { Counter } from './counter'
@@ -10,7 +10,7 @@ import { MonthFrequencyEditor } from './monthFrequencyEditor'
 import { YearlyFreqEditor } from './yearlyFreqEditor'
 import { useI18n } from '@sitegeist/groundhogday-neos-bridge'
 
-export const RepeatTabContent: React.FC<TabContentProps> = ({ rrule, onChange }) => {
+export const RepeatTabContent: React.FC<RRuleEditorComponentProps> = ({ rrule, onChange }) => {
     const i18n = useI18n();
     
     const handleIntervalChange = (newInterval: number) => {

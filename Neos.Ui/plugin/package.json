@@ -8,6 +8,6 @@
     },
     "dependencies": {
         "@neos-project/neos-ui-extensibility": "~8.3.0",
-        "@sitegeist/groundhogday-rrule-inspector-editor": "workspace:*"
+        "@sitegeist/groundhogday-occurence-editor": "workspace:*"
     }
 }

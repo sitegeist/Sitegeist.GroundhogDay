@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ByWeekday, RRule } from 'rrule';
 import { getWeekdayOptions } from '../utils/constants';
-import { TabContentProps } from '../types';
+import { RRuleEditorComponentProps } from '../types';
 import { Container } from './container';
 import { Label } from '@neos-project/react-ui-components';
 import { useI18n } from '@sitegeist/groundhogday-neos-bridge';
@@ -32,7 +32,7 @@ const SelectedItem = styled.button<{ selected: boolean }>`
 
 type WeekdaySelectorProps = {
     hideLabel?: boolean;
-} & TabContentProps
+} & RRuleEditorComponentProps
 
 const WeekdaySelector: React.FC<WeekdaySelectorProps> = ({ hideLabel = false, rrule, onChange }) => {
     const weekdays: ByWeekday[] = rrule.options.byweekday;

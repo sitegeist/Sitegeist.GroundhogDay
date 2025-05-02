@@ -16,6 +16,12 @@
             <trans-unit id="inspector.selectDate" xml:space="preserve" approved="yes">
                 <source>Select a date</source>
             </trans-unit>
+            <trans-unit id="inspector.selectStartDate" xml:space="preserve" approved="yes">
+                <source>Select a start date</source>
+            </trans-unit>
+            <trans-unit id="inspector.selectEndDate" xml:space="preserve" approved="yes">
+                <source>Select a end date</source>
+            </trans-unit>
             <trans-unit id="inspector.start" xml:space="preserve" approved="yes">
                 <source>Start</source>
             </trans-unit>
@@ -165,6 +171,12 @@
             </trans-unit>
             <trans-unit id="month.dec" xml:space="preserve" approved="yes">
                 <source>Dec</source>
+            </trans-unit>
+            <trans-unit id="occurence.rrule" xml:space="preserve" approved="yes">
+                <source>Recurrence Rule</source>
+            </trans-unit>
+            <trans-unit id="occurence.manual" xml:space="preserve" approved="yes">
+                <source>Manual</source>
             </trans-unit>
         </body>
     </file>

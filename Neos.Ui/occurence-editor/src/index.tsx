@@ -4,6 +4,7 @@ import { IGlobalRegistry, NeosContext } from '@sitegeist/groundhogday-neos-bridg
 import { OcurrenceEditor } from './editors/OccurenceEditor'
 import { OccurenceProvider } from './context/OccurenceContext'
 import { OccurenceCommitObject, OccurenceState } from './types'
+import { normalizeDates } from './utils/normalizeRecurrenceDates'
 
 export function registerOccurenceEditor(globalRegistry: IGlobalRegistry): void {
     const inspectorRegistry = globalRegistry.get('inspector')
@@ -29,7 +30,7 @@ export function registerOccurenceEditor(globalRegistry: IGlobalRegistry): void {
                     startDate: occurence.startDate,
                     endDate: occurence.endDate,
                     recurrenceRule: occurence.recurrenceRule?.toString() ?? undefined,
-                    recurrenceDates: occurence.recurrenceDates
+                    recurrenceDates: normalizeDates(occurence.recurrenceDates)
                 }
 
                 console.log('COMMITING OCCURENCE: ', occurenceCommit);

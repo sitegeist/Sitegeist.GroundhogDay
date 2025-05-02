@@ -228,6 +228,14 @@
                 <source>Manual</source>
                 <target state="translated">Manuell</target>
             </trans-unit>
+            <trans-unit id="inspector.addDate" xml:space="preserve" approved="yes">
+                <source>Add a date</source>
+                <target state="translated">Datum hinzufügen</target>
+            </trans-unit>
+            <trans-unit id="inspector.eventStartAndEnd" xml:space="preserve" approved="yes">
+                <source>Start and end of Event</source>
+                <target state="translated">Start und Ende des Events</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

@@ -7,7 +7,7 @@ type OccurenceContextType = {
     setStartDate: (date: Date) => void;
     setEndDate: (date: Date) => void;
     setRRule: (rrule: RRule) => void;
-    setRecurrencDates: (dates: Date[]) => void;
+    setRecurrencDates: (dates:  (Date | null)[]) => void;
     resetRecurrenceDatesAndRule: () => void;
 };
 
@@ -64,7 +64,7 @@ export const OccurenceProvider = (
         onCommit(next);
     };
     
-    const setRecurrencDates = (dates: Date[]) => {
+    const setRecurrencDates = (dates: (Date | null)[]) => {
         const next = {
             ...occurence,
             recurrenceRule: undefined,

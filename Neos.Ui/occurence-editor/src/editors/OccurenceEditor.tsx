@@ -44,6 +44,10 @@ export const OcurrenceEditor = () => {
         setOccurenceMethod(value);
     }
 
+    const handleOccurenceDatesChange = (dates: (Date | null)[]) => {
+        setRecurrencDates(dates);
+    }
+
     return (
         <EditorContainer>
             <EventDatesEditor />
@@ -57,7 +61,10 @@ export const OcurrenceEditor = () => {
                 <RRuleEditor />
             }
             {occurenceMethod == 'manual' &&
-                <MultiDateInput />
+                <MultiDateInput
+                    value={occurence.recurrenceDates}
+                    onChange={handleOccurenceDatesChange}
+                />
             }
         </EditorContainer>
     )

@@ -18,7 +18,7 @@ export const EventDatesEditor = () => {
 
     return (
         <Container>
-            <Label>Event Zeitraum</Label>
+            <Label>{i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.eventStartAndEnd')}</Label>
             <DateInput
                 theme={{
                     'selectTodayBtn': 'select-tdy-btn'

@@ -4,7 +4,7 @@ export type OccurenceState = {
     startDate?: Date,
     endDate?: Date,
     recurrenceRule?: RRule,
-    recurrenceDates?: Date[],
+    recurrenceDates?: (Date | null)[],
 }
 
 export type OccurenceCommitObject = {

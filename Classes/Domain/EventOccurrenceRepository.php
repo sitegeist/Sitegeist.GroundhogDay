@@ -262,7 +262,7 @@ final class EventOccurrenceRepository
         \DateTimeImmutable $startDate,
         ?\DateTimeImmutable $endDate,
         \DateTimeImmutable $referenceDate,
-    ) {
+    ): void {
         $this->databaseConnection->transactional(function () use ($calendarId, $eventId, $referenceDate, $recurrenceDates, $startDate, $endDate) {
             $this->removeAllFutureManualOccurrencesByEventId($eventId, $referenceDate);
 

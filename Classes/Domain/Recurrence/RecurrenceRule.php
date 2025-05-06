@@ -18,6 +18,9 @@ final readonly class RecurrenceRule implements \JsonSerializable, \Stringable
 
     public static function fromString(string $value): self
     {
+        if (\str_starts_with($value, 'RRULE:')) {
+            $value = 'RRULE:' . $value;
+        }
         try {
             new Rule($value); // just for validation
             return new self($value);

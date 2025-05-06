@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\GroundhogDay\Domain\Recurrence;
+namespace Sitegeist\GroundhogDay\Domain;
 
 use Neos\Flow\Annotations as Flow;
 
 /**
+ * @see https://icalendar.org/iCalendar-RFC-5545/3-8-5-1-exception-date-times.html
  * @implements \IteratorAggregate<int,\DateTimeImmutable>
  */
 #[Flow\Proxy(false)]
-final readonly class RecurrenceDates implements \JsonSerializable, \Stringable, \IteratorAggregate
+final readonly class ExceptionDateTimes implements \JsonSerializable, \Stringable, \IteratorAggregate
 {
     /**
      * @var array<int,\DateTimeImmutable>
@@ -50,7 +51,7 @@ final readonly class RecurrenceDates implements \JsonSerializable, \Stringable, 
 
     public function toString(): string
     {
-        return 'RDATE;' . implode(',', array_map(
+        return 'EXDATE;' . implode(',', array_map(
             fn (\DateTimeImmutable $date): string => 'TZID=' . $date->getTimezone()->getName() . ':' . $date->format('YmdTHis'),
             $this->items
         ));

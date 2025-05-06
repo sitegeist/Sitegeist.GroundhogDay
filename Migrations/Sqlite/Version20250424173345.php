@@ -18,7 +18,7 @@ class Version20250424173345 extends AbstractMigration
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'sqlite', 'Migration can only be executed safely on "sqlite".');
 
-        $this->addSql('CREATE TABLE sitegeist_groundhogday_domain_event_occurrence (calendar_id VARCHAR(64) NOT NULL, event_id VARCHAR(64) NOT NULL, start_date DATETIME NOT NULL, end_date DATETIME NOT NULL, source VARCHAR(64) NOT NULL, PRIMARY KEY(event_id, start_date))');
+        $this->addSql('CREATE TABLE sitegeist_groundhogday_domain_event_occurrence (calendar_id VARCHAR(64) NOT NULL, event_id VARCHAR(64) NOT NULL, start_date DATETIME NOT NULL, end_date DATETIME NOT NULL, PRIMARY KEY(event_id, start_date))');
     }
 
     public function down(Schema $schema): void

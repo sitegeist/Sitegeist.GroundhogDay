@@ -12,12 +12,6 @@ use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
 use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\Doctrine\ConnectionFactory;
-use Recurr\Rule;
-use Recurr\Transformer\ArrayTransformer;
-use Recurr\Transformer\Constraint\BeforeConstraint;
-use Recurr\Transformer\Constraint\BetweenConstraint;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceDates;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
 
 /**
  * @todo timezone support
@@ -44,8 +38,12 @@ final class EventOccurrenceRepository
     /**
      * @return iterable<int,EventOccurrence>
      */
-    public function findEventOccurrencesWithinPeriod(NodeAggregateIdentifier $calendarId, \DateTimeImmutable $startDate, \DateTimeImmutable $endDate): iterable
-    {
+    public function findEventOccurrencesWithinPeriod(
+        NodeAggregateIdentifier $calendarId,
+        \DateTimeImmutable $startDate,
+        \DateTimeImmutable $endDate,
+        ?\DateTimeZone $timeZone = null
+    ): iterable {
         /** @var array<int,DatabaseRow> $rows */
         $rows = $this->databaseConnection->executeQuery(
             'SELECT * FROM ' . self::TABLE_NAME
@@ -58,15 +56,17 @@ final class EventOccurrenceRepository
         )->fetchAllAssociative();
 
         foreach ($rows as $row) {
-            yield $this->mapDatabaseRowToEventOccurrence($row);
+            yield $this->mapDatabaseRowToEventOccurrence($row, $timeZone);
         }
     }
 
     /**
      * @return iterable<int,EventOccurrence>
      */
-    public function findEventOccurrencesByEventId(NodeAggregateIdentifier $eventId): iterable
-    {
+    public function findEventOccurrencesByEventId(
+        NodeAggregateIdentifier $eventId,
+        ?\DateTimeZone $timeZone = null,
+    ): iterable {
         /** @var array<int,DatabaseRow> $rows */
         $rows = $this->databaseConnection->executeQuery(
             'SELECT * FROM ' . self::TABLE_NAME
@@ -77,15 +77,18 @@ final class EventOccurrenceRepository
         )->fetchAllAssociative();
 
         foreach ($rows as $row) {
-            yield $this->mapDatabaseRowToEventOccurrence($row);
+            yield $this->mapDatabaseRowToEventOccurrence($row, $timeZone);
         }
     }
 
     /**
      * @return iterable<int,EventOccurrence>
      */
-    public function findFutureEventOccurrencesByEventId(NodeAggregateIdentifier $eventId, \DateTimeImmutable $referenceDate): iterable
-    {
+    public function findFutureEventOccurrencesByEventId(
+        NodeAggregateIdentifier $eventId,
+        \DateTimeImmutable $referenceDate,
+        ?\DateTimeZone $timeZone = null,
+    ): iterable {
         /** @var array<int,DatabaseRow> $rows */
         $rows = $this->databaseConnection->executeQuery(
             'SELECT * FROM ' . self::TABLE_NAME
@@ -97,7 +100,7 @@ final class EventOccurrenceRepository
         )->fetchAllAssociative();
 
         foreach ($rows as $row) {
-            yield $this->mapDatabaseRowToEventOccurrence($row);
+            yield $this->mapDatabaseRowToEventOccurrence($row, $timeZone);
         }
     }
 
@@ -111,62 +114,49 @@ final class EventOccurrenceRepository
         );
     }
 
-    public function removeAllFutureRecurrencesByEventId(NodeAggregateIdentifier $eventId, \DateTimeImmutable $referenceDate): void
+    public function removeAllFutureOccurrencesByEventId(NodeAggregateIdentifier $eventId, \DateTimeImmutable $referenceDate): void
     {
         $this->databaseConnection->executeStatement(
-            'DELETE FROM ' . self::TABLE_NAME . ' WHERE event_id = :eventId AND end_date > :referenceDate AND source = :source',
+            'DELETE FROM ' . self::TABLE_NAME . ' WHERE event_id = :eventId AND end_date > :referenceDate',
             [
                 'eventId' => (string)$eventId,
                 'referenceDate' => $referenceDate->format(self::DATE_FORMAT),
-                'source' => EventOccurrenceSource::SOURCE_RECURRENCE_RULE->value,
             ]
         );
     }
 
-    public function removeAllFutureManualOccurrencesByEventId(NodeAggregateIdentifier $eventId, \DateTimeImmutable $referenceDate): void
-    {
-        $this->databaseConnection->executeStatement(
-            'DELETE FROM ' . self::TABLE_NAME . ' WHERE event_id = :eventId AND end_date > :referenceDate AND source = :source',
-            [
-                'eventId' => (string)$eventId,
-                'referenceDate' => $referenceDate->format(self::DATE_FORMAT),
-                'source' => EventOccurrenceSource::SOURCE_RECURRENCE_DATE->value,
-            ]
-        );
-    }
-
-    public function replaceAllFutureRecurrencesByEventId(
-        NodeAggregateIdentifier $calendarId,
+    public function initializeOccurrences(
         NodeAggregateIdentifier $eventId,
-        RecurrenceRule $recurrenceRule,
-        \DateTimeImmutable $startDate,
-        ?\DateTimeImmutable $endDate,
-        \DateTimeImmutable $referenceDate
+        NodeAggregateIdentifier $calendarId,
+        EventOccurrenceSpecification $occurrenceSpecification,
     ): void {
-        $renderer = new ArrayTransformer();
-        /** @var list<EventOccurrence> $futureDates */
-        $futureDates = [];
+        $dates = $occurrenceSpecification->resolveDates();
 
-        $rule = new Rule($recurrenceRule->value, $startDate, $endDate);
-        foreach (
-            $renderer->transform(
-                $rule,
-                /** @todo make configurable */
-                $rule->getEndDate() ? null : new BeforeConstraint($referenceDate->add(new \DateInterval('P1Y')))
-            ) as $recurrence
-        ) {
-            $occurrence = EventOccurrence::tryFromRecurrence($eventId, $recurrence);
-            if (!$occurrence instanceof EventOccurrence || $occurrence->startDate < $referenceDate) {
-                continue;
+        $this->databaseConnection->transactional(function () use ($calendarId, $eventId, $dates) {
+            foreach ($dates as $date) {
+                $this->databaseConnection->insert(
+                    self::TABLE_NAME,
+                    [
+                        'calendar_id' => (string)$calendarId,
+                        'event_id' => (string)$eventId,
+                        'start_date' => $date->startDate->format(self::DATE_FORMAT),
+                        'end_date' => $date->endDate->format(self::DATE_FORMAT),
+                    ]
+                );
             }
+        });
+    }
 
-            $futureDates[] = $occurrence;
-        }
+    public function replaceAllFutureOccurrencesByEventId(
+        NodeAggregateIdentifier $eventId,
+        NodeAggregateIdentifier $calendarId,
+        EventOccurrenceSpecification $occurrenceSpecification,
+        \DateTimeImmutable $referenceDate,
+    ): void {
+        $this->databaseConnection->transactional(function () use ($eventId, $calendarId, $occurrenceSpecification, $referenceDate) {
+            $this->removeAllFutureOccurrencesByEventId($eventId, $referenceDate);
 
-        $this->databaseConnection->transactional(function () use ($calendarId, $eventId, $referenceDate, $futureDates) {
-            $this->removeAllFutureRecurrencesByEventId($eventId, $referenceDate);
-
-            foreach ($futureDates as $futureDate) {
+            foreach ($occurrenceSpecification->resolveDates($referenceDate) as $futureDate) {
                 $this->databaseConnection->insert(
                     self::TABLE_NAME,
                     [
@@ -174,7 +164,6 @@ final class EventOccurrenceRepository
                         'event_id' => (string)$eventId,
                         'start_date' => $futureDate->startDate->format(self::DATE_FORMAT),
                         'end_date' => $futureDate->endDate->format(self::DATE_FORMAT),
-                        'source' => EventOccurrenceSource::SOURCE_RECURRENCE_RULE->value,
                     ]
                 );
             }
@@ -198,132 +187,77 @@ final class EventOccurrenceRepository
             )
         )->execute();
 
-        $renderer = new ArrayTransformer();
         /** @var iterable<NodeData> $nodeDataRecords */
         foreach ($nodeDataRecords as $nodeDataRecord) {
             $occurrenceSpecification = $nodeDataRecord->getProperty('occurrence');
             if ($occurrenceSpecification instanceof EventOccurrenceSpecification && $occurrenceSpecification->recurrenceRule !== null) {
-                $rule = new Rule(
-                    $occurrenceSpecification->recurrenceRule->value,
-                    $occurrenceSpecification->startDate,
-                    $occurrenceSpecification->endDate,
-                );
-                if (!$rule->getEndDate()) {
-                    $eventId = NodeAggregateIdentifier::fromString($nodeDataRecord->getIdentifier());
-                    /** @var list<EventOccurrence> $futureDates */
-                    $futureDates = [];
-                    $lastRecurrenceRecord = $this->findLastRecurrenceRecord($eventId);
-                    if (!$lastRecurrenceRecord) {
-                        // this is technically not correct, but resolving ancestors from event IDs is something for Neos 9
-                        continue;
-                    }
-
-                    /** @todo make configurable */
-                    $recurrenceLimitDate = $referenceDate->add(new \DateInterval('P1Y'));
-                    foreach (
-                        $renderer->transform(
-                            $rule,
-                            new BetweenConstraint(
-                                /** @phpstan-ignore-next-line (always \DateTimeImmutable) */
-                                \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $lastRecurrenceRecord['start_date']),
-                                $recurrenceLimitDate
-                            )
-                        ) as $recurrence
-                    ) {
-                        $occurrence = EventOccurrence::tryFromRecurrence($eventId, $recurrence);
-                        if (!$occurrence instanceof EventOccurrence) {
-                            continue;
-                        }
-
-                        $futureDates[] = $occurrence;
-                    }
-
-                    foreach ($futureDates as $futureDate) {
-                        $this->databaseConnection->insert(
-                            self::TABLE_NAME,
+                $eventId = $nodeDataRecord->getIdentifier();
+                $lastOccurrenceRecord = $this->findLastOccurrenceRecord(NodeAggregateIdentifier::fromString($eventId));
+                if (!$lastOccurrenceRecord) {
+                    // this is technically not correct, but resolving ancestors from event IDs is something for Neos 9
+                    continue;
+                }
+                $calendarId = $lastOccurrenceRecord['calendar_id'];
+                foreach ($occurrenceSpecification->resolveRecurrenceDates($referenceDate) as $date) {
+                    $this->databaseConnection->transactional(function () use ($eventId, $calendarId, $date) {
+                        $countRow = $this->databaseConnection->executeQuery(
+                            'SELECT COUNT(*) FROM ' . self::TABLE_NAME . ' WHERE event_id = :eventId AND start_date = :startDate',
                             [
-                                'calendar_id' => $lastRecurrenceRecord['calendar_id'],
-                                'event_id' => (string)$eventId,
-                                'start_date' => $futureDate->startDate->format(self::DATE_FORMAT),
-                                'end_date' => $futureDate->endDate->format(self::DATE_FORMAT),
-                                'source' => EventOccurrenceSource::SOURCE_RECURRENCE_RULE->value,
+                                'eventId' => $eventId,
+                                'startDate' => $date->startDate->format(self::DATE_FORMAT),
                             ]
-                        );
-                    }
+                        )->fetchAssociative() ?: [];
+                        $numberOfRecords = $countRow['COUNT(*)'] ?? 0;
+                        if ($numberOfRecords === 0) {
+                            $this->databaseConnection->insert(
+                                self::TABLE_NAME,
+                                [
+                                    'calendar_id' => $calendarId,
+                                    'event_id' => $eventId,
+                                    'start_date' => $date->startDate->format(self::DATE_FORMAT),
+                                    'end_date' => $date->endDate->format(self::DATE_FORMAT),
+                                ]
+                            );
+                        }
+                    });
                 }
             }
         }
     }
 
-    public function replaceAllFutureManualOccurrencesByEventId(
-        NodeAggregateIdentifier $eventId,
-        NodeAggregateIdentifier $calendarId,
-        RecurrenceDates $recurrenceDates,
-        \DateTimeImmutable $startDate,
-        ?\DateTimeImmutable $endDate,
-        \DateTimeImmutable $referenceDate,
-    ): void {
-        $this->databaseConnection->transactional(function () use ($calendarId, $eventId, $referenceDate, $recurrenceDates, $startDate, $endDate) {
-            $this->removeAllFutureManualOccurrencesByEventId($eventId, $referenceDate);
-
-            $difference = $endDate?->diff($startDate);
-            foreach ($recurrenceDates as $recurrenceDate) {
-                if ($recurrenceDate < $referenceDate) {
-                    continue;
-                }
-                $recurrenceStartDate = $recurrenceDate;
-                /** @todo implement proper date object */
-                if ($recurrenceDate->format('H:i:s') === '00:00:00') {
-                    $recurrenceStartDate = $recurrenceStartDate->setTime((int)$startDate->format('H'), (int)$startDate->format('i'), (int)$startDate->format('s'));
-                }
-                $this->databaseConnection->insert(
-                    self::TABLE_NAME,
-                    [
-                        'calendar_id' => (string)$calendarId,
-                        'event_id' => (string)$eventId,
-                        'start_date' => $recurrenceStartDate->format(self::DATE_FORMAT),
-                        'end_date' => ($difference ? $recurrenceStartDate->add($difference) : $recurrenceStartDate)->format(self::DATE_FORMAT),
-                        'source' => EventOccurrenceSource::SOURCE_RECURRENCE_RULE->value,
-                    ]
-                );
-            }
-        });
-    }
-
     /**
      * @param DatabaseRow $row
      */
-    private function mapDatabaseRowToEventOccurrence(array $row): EventOccurrence
+    private function mapDatabaseRowToEventOccurrence(array $row, ?\DateTimeZone $timeZone): EventOccurrence
     {
         return new EventOccurrence(
             NodeAggregateIdentifier::fromString($row['event_id']),
-            self::createDate($row['start_date']),
-            self::createDate($row['end_date']),
+            self::createDate($row['start_date'], $timeZone),
+            self::createDate($row['end_date'], $timeZone),
         );
     }
 
     /**
      * @return ?DatabaseRow
      */
-    private function findLastRecurrenceRecord(NodeAggregateIdentifier $eventId): ?array
+    private function findLastOccurrenceRecord(NodeAggregateIdentifier $eventId): ?array
     {
         /** @phpstan-ignore-next-line (array shenanigans) */
         return $this->databaseConnection->executeQuery(
             'SELECT * FROM ' . self::TABLE_NAME
-            . ' WHERE event_id = :eventId AND source = :source'
+            . ' WHERE event_id = :eventId'
             . ' ORDER BY start_date DESC'
             . ' LIMIT 1',
             [
                 'eventId' => (string)$eventId,
-                'source' => EventOccurrenceSource::SOURCE_RECURRENCE_RULE->value,
             ]
         )->fetchAssociative() ?: null;
     }
 
-    private static function createDate(string $dateString): \DateTimeImmutable
+    private static function createDate(string $dateString, ?\DateTimeZone $timeZone): \DateTimeImmutable
     {
         /** @var \DateTimeImmutable $result */
-        $result = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $dateString);
+        $result = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $dateString, $timeZone);
 
         return $result;
     }

@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Sitegeist\GroundhogDay\Domain;
 
 use Neos\Flow\Annotations as Flow;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceDatesWereChanged;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
+use Sitegeist\GroundhogDay\Domain\Recurrence\EventOccurrenceSpecificationWasChanged;
 
 /**
  * The event date zookeeper, implementing the policy that whenever
- * * an event's recurrence rule was changed
+ * * an event was created
+ * * an event's occurrence specification was changed
+ * * an event was removed
  * * time has passed
- * the event dates are to be updated
+ * the event occurrences are to be updated
  */
 #[Flow\Scope('singleton')]
 final class EventOccurrenceZookeeper
@@ -22,45 +23,32 @@ final class EventOccurrenceZookeeper
     ) {
     }
 
-    public function whenRecurrenceRuleWasChanged(RecurrenceRuleWasChanged $event): void
+    public function whenEventWasCreated(EventWasCreated $event): void
     {
-        if ($event->changedRule === null) {
-            $this->eventOccurrenceRepository->removeAllFutureRecurrencesByEventId($event->eventId, $event->dateOfChange);
-        } else {
-            $this->eventOccurrenceRepository->replaceAllFutureRecurrencesByEventId(
-                $event->calendarId,
-                $event->eventId,
-                $event->changedRule,
-                $event->startDate,
-                $event->endDate,
-                $event->dateOfChange
-            );
-        }
+        $this->eventOccurrenceRepository->initializeOccurrences(
+            eventId: $event->eventId,
+            calendarId: $event->calendarId,
+            occurrenceSpecification: $event->occurrenceSpecification
+        );
     }
 
-    public function whenRecurrenceDatesWereChanged(RecurrenceDatesWereChanged $event): void
+    public function whenEventOccurrenceSpecificationWasChanged(EventOccurrenceSpecificationWasChanged $event): void
     {
-        if ($event->changedDates === null) {
-            $this->eventOccurrenceRepository->removeAllFutureManualOccurrencesByEventId($event->eventId, $event->dateOfChange);
-        } else {
-            $this->eventOccurrenceRepository->replaceAllFutureManualOccurrencesByEventId(
-                $event->calendarId,
-                $event->eventId,
-                $event->changedDates,
-                $event->startDate,
-                $event->endDate,
-                $event->dateOfChange,
-            );
-        }
-    }
-
-    public function whenEventWasRemoved(EventWasRemoved $event): void
-    {
-        $this->eventOccurrenceRepository->removeAllOccurrencesByEventId($event->eventId);
+        $this->eventOccurrenceRepository->replaceAllFutureOccurrencesByEventId(
+            eventId: $event->eventId,
+            calendarId: $event->calendarId,
+            occurrenceSpecification: $event->occurrenceSpecification,
+            referenceDate: $event->dateOfChange
+        );
     }
 
     public function whenTimeHasPassed(TimeHasPassed $event): void
     {
         $this->eventOccurrenceRepository->continueAllRecurrenceRules($event->dateTime);
+    }
+
+    public function whenEventWasRemoved(EventWasRemoved $event): void
+    {
+        $this->eventOccurrenceRepository->removeAllOccurrencesByEventId($event->eventId);
     }
 }

@@ -13,11 +13,9 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Neos\Domain\Service\ContentContextFactory;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceZookeeper;
+use Sitegeist\GroundhogDay\Domain\EventWasCreated;
 use Sitegeist\GroundhogDay\Domain\EventWasRemoved;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceDatesAreChanged;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceDatesWereChanged;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleIsChanged;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleWasChanged;
+use Sitegeist\GroundhogDay\Domain\Recurrence\EventOccurrenceSpecificationWasChanged;
 
 /**
  * The event relay infrastructure service
@@ -29,7 +27,7 @@ class EventRelay
 {
     /**
      * @param array<string,string> $eventIdsToCheckForRemoval
-     * @param array<RecurrenceRuleWasChanged|RecurrenceDatesWereChanged> $eventsToPublish
+     * @param array<EventOccurrenceSpecificationWasChanged|EventWasCreated> $eventsToPublish
      */
     public function __construct(
         private readonly EventOccurrenceZookeeper $eventOccurrenceZookeeper,
@@ -52,35 +50,28 @@ class EventRelay
                 return;
             }
 
-            $oldValue = null;
             $liveContextProperties = $node->getContext()->getProperties();
             $liveContextProperties['workspaceName'] = 'live';
             $liveContext = $this->contentContextFactory->create($liveContextProperties);
             $liveEvent = $liveContext->getNodeByIdentifier($node->getIdentifier());
             if ($liveEvent) {
                 $oldValue = $liveEvent->getProperty('occurrence');
-                $oldValue = $oldValue instanceof EventOccurrenceSpecification ? $oldValue : null;
-            }
-
-            if (RecurrenceRuleIsChanged::isSatisfiedByEventOccurrenceSpecifications($oldValue, $newValue)) {
-                $this->eventsToPublish[] = new RecurrenceRuleWasChanged(
-                    $this->resolveCalendarId($node),
+                if (
+                    !$oldValue instanceof EventOccurrenceSpecification
+                    || !$newValue->equals($oldValue)
+                ) {
+                    $this->eventsToPublish[] = EventOccurrenceSpecificationWasChanged::create(
+                        $node->getNodeAggregateIdentifier(),
+                        $this->resolveCalendarId($node),
+                        $newValue,
+                        new \DateTimeImmutable(),
+                    );
+                }
+            } else {
+                $this->eventsToPublish[] = EventWasCreated::create(
                     $node->getNodeAggregateIdentifier(),
-                    $newValue->recurrenceRule,
-                    $newValue->startDate,
-                    $newValue->endDate,
-                    new \DateTimeImmutable(),
-                );
-            }
-
-            if (RecurrenceDatesAreChanged::isSatisfiedByEventOccurrenceSpecifications($oldValue, $newValue)) {
-                $this->eventsToPublish[] = new RecurrenceDatesWereChanged(
                     $this->resolveCalendarId($node),
-                    $node->getNodeAggregateIdentifier(),
-                    $newValue->startDate,
-                    $newValue->endDate,
-                    $newValue->recurrenceDates,
-                    new \DateTimeImmutable(),
+                    $newValue,
                 );
             }
         }
@@ -138,11 +129,11 @@ class EventRelay
 
         foreach ($this->eventsToPublish as $eventToPublish) {
             switch (get_class($eventToPublish)) {
-                case RecurrenceRuleWasChanged::class:
-                    $this->eventOccurrenceZookeeper->whenRecurrenceRuleWasChanged($eventToPublish);
+                case EventWasCreated::class:
+                    $this->eventOccurrenceZookeeper->whenEventWasCreated($eventToPublish);
                     break;
-                case RecurrenceDatesWereChanged::class:
-                    $this->eventOccurrenceZookeeper->whenRecurrenceDatesWereChanged($eventToPublish);
+                case EventOccurrenceSpecificationWasChanged::class:
+                    $this->eventOccurrenceZookeeper->whenEventOccurrenceSpecificationWasChanged($eventToPublish);
                     break;
             }
         }

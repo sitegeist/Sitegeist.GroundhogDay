@@ -6,34 +6,31 @@ namespace Sitegeist\GroundhogDay\Infrastructure;
 
 use Neos\Flow\Property\PropertyMappingConfigurationInterface;
 use Neos\Flow\Property\TypeConverter\AbstractTypeConverter;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRuleIsInvalid;
+use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
 
-class StringToRecurrenceRuleConverter extends AbstractTypeConverter
+class EventOccurrenceSpecificationToArrayConverter extends AbstractTypeConverter
 {
     /**
      * @var array<int,string>
      */
-    protected $sourceTypes = ['string'];
+    protected $sourceTypes = [EventOccurrenceSpecification::class];
 
     /**
-     * The target type this converter can convert to.
-     *
      * @var string
      * @api
      */
-    protected $targetType = RecurrenceRule::class;
+    protected $targetType = 'array';
 
     /**
      * @var integer
      */
-    protected $priority = 1;
+    protected $priority = 10;
 
     /**
-     * @param string $source
+     * @param EventOccurrenceSpecification $source
      * @param string $targetType,
      * @param array<mixed> $convertedChildProperties
-     * @return ?RecurrenceRule
+     * @return string
      */
     public function convertFrom(
         $source,
@@ -41,10 +38,6 @@ class StringToRecurrenceRuleConverter extends AbstractTypeConverter
         array $convertedChildProperties = [],
         ?PropertyMappingConfigurationInterface $configuration = null
     ) {
-        try {
-            return RecurrenceRule::fromString($source);
-        } catch (RecurrenceRuleIsInvalid) {
-            return null;
-        }
+        return $source->toString();
     }
 }

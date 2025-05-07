@@ -48,6 +48,66 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
         );
     }
 
+    public static function fromString(string $value): self
+    {
+        $startDate = null;
+        $endDate = null;
+        $duration = null;
+        $recurrenceRule = null;
+        $recurrenceDatesTimes = null;
+        $exceptionDateTimes = null;
+
+        $parts = \explode("\n", $value);
+
+        foreach ($parts as $part) {
+            if (\str_starts_with($part, 'DTSTART:')) {
+                $startDate = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, \mb_substr($part, 8));
+            } elseif (\str_starts_with($part, 'DTEND:')) {
+                $startDate = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, \mb_substr($part, 6));
+            } elseif (\str_starts_with($part, 'DURATION:')) {
+                $startDate = new \DateInterval(\mb_substr($part, 9));
+            } elseif (\str_starts_with($part, 'RRULE:')) {
+                $recurrenceRule = RecurrenceRule::fromString($part);
+            } elseif (\str_starts_with($part, 'RDATE;')) {
+                $recurrenceRule = RecurrenceDateTimes::fromString($part);
+            } elseif (\str_starts_with($part, 'EXDATE;')) {
+                $recurrenceRule = ExceptionDateTimes::fromString($part);
+            }
+        }
+
+        if ($startDate === null) {
+            throw StartDateIsMissing::butWasRequired($value);
+        }
+
+        return new self(
+            $startDate,
+            $endDate,
+            $duration,
+            $recurrenceRule,
+            $recurrenceDatesTimes,
+            $exceptionDateTimes,
+        );
+    }
+
+    public static function fromArray(array $values): self
+    {
+        \Neos\Flow\var_dump($values);
+        exit();
+        if (!array_key_exists('startDate', $values)) {
+            throw StartDateIsMissing::butWasRequired(\json_encode($values));
+        }
+        $startDate = is_array($values['startDate'])
+            ? new \DateTimeImmutable($values['startDate']['date'], new \DateTimeZone($values['startDate']['timezone']))
+            : \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $values['startDate']);
+        #$endDate = array_key_exists('endDate', $values)
+        #    ? \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $values['startDate'])
+        #    : null;
+
+        return EventOccurrenceSpecification::create(
+            $startDate,
+        );
+    }
+
     public function resolveEndDate(): ?\DateTimeImmutable
     {
         return $this->endDate

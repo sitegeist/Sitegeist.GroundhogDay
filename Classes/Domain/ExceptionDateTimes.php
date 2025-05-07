@@ -28,6 +28,21 @@ final readonly class ExceptionDateTimes implements \JsonSerializable, \Stringabl
         return new self(...$items);
     }
 
+    public static function fromString(string $value): self
+    {
+        $dateTimes = [];
+        foreach (\explode(',', \mb_substr($value, 7)) as $part) { // EXDATE;
+            [$timeZoneDeclaration, $dateString] = explode(':', $part);
+            $dateTimes[] = \DateTimeImmutable::createFromFormat(
+                EventOccurrenceSpecification::DATE_FORMAT,
+                $dateString,
+                new \DateTimeZone(\mb_substr($timeZoneDeclaration, 5)) // TZID=
+            );
+        }
+
+        return new self(...$dateTimes);
+    }
+
     public function isEmpty(): bool
     {
         return empty($this->items);

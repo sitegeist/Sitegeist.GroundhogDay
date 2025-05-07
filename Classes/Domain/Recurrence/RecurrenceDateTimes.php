@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sitegeist\GroundhogDay\Domain\Recurrence;
 
 use Neos\Flow\Annotations as Flow;
+use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
 
 /**
  * @see https://icalendar.org/iCalendar-RFC-5545/3-8-5-2-recurrence-date-times.html
@@ -26,6 +27,21 @@ final readonly class RecurrenceDateTimes implements \JsonSerializable, \Stringab
     public static function create(\DateTimeImmutable ...$items): self
     {
         return new self(...$items);
+    }
+
+    public static function fromString(string $value): self
+    {
+        $dateTimes = [];
+        foreach (\explode(',', \mb_substr($value, 6)) as $part) { // RDATE;
+            [$timeZoneDeclaration, $dateString] = explode(':', $part);
+            $dateTimes[] = \DateTimeImmutable::createFromFormat(
+                EventOccurrenceSpecification::DATE_FORMAT,
+                $dateString,
+                new \DateTimeZone(\mb_substr($timeZoneDeclaration, 5)) // TZID=
+            );
+        }
+
+        return new self(...$dateTimes);
     }
 
     public function isEmpty(): bool

@@ -12,6 +12,7 @@
       type: Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification
       ui:
         reloadIfChanged: true
+        showInCreationDialog: true
         label: i18n
         inspector:
           group: event

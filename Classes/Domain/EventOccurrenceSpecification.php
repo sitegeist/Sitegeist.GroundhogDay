@@ -12,7 +12,7 @@ use Recurr\Transformer\Constraint\BeforeConstraint;
 #[Flow\Proxy(false)]
 final readonly class EventOccurrenceSpecification implements \JsonSerializable, \Stringable
 {
-    public const DATE_FORMAT = 'YmdHisp';
+    public const DATE_FORMAT = 'Ymd\THisp';
     public const DURATION_FORMAT = 'P%dDT%hH%iM%sS';
 
     public function __construct(
@@ -89,18 +89,29 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
 
     public static function fromArray(array $values): self
     {
+        $values = array_filter($values);
         if (!array_key_exists('startDate', $values)) {
             throw StartDateIsMissing::butWasRequired(\json_encode($values));
         }
-        $startDate = is_array($values['startDate'])
-            ? new \DateTimeImmutable($values['startDate']['date'], new \DateTimeZone($values['startDate']['timezone']))
-            : \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $values['startDate']);
-        #$endDate = array_key_exists('endDate', $values)
-        #    ? \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $values['startDate'])
-        #    : null;
 
-        return EventOccurrenceSpecification::create(
+        $startDate = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $values['startDate']);
+        $endDate = array_key_exists('endDate', $values)
+            ? \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $values['endDate'])
+            : null;
+
+        $duration = array_key_exists('duration', $values)
+            ? new \DateInterval($values['duration'])
+            : null;
+
+        $recurrenceRule = array_key_exists('recurrenceRule', $values)
+            ? RecurrenceRule::fromString($values['recurrenceRule'])
+            : null;
+
+        return self::create(
             $startDate,
+            $endDate,
+            $duration,
+            $recurrenceRule,
         );
     }
 

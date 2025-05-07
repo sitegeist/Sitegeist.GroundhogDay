@@ -217,7 +217,12 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
      */
     public function jsonSerialize(): array
     {
-        return get_object_vars($this);
+        $values = get_object_vars($this);
+        $values['startDate'] = $values['startDate']->format(self::DATE_FORMAT);
+        $values['endDate'] = $values['endDate']?->format(self::DATE_FORMAT);
+        $values['duration'] = $values['duration']?->format(self::DURATION_FORMAT);
+
+        return $values;
     }
 
     public function toString(): string

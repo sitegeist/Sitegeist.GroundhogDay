@@ -60,16 +60,22 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
         foreach ($parts as $part) {
             if (\str_starts_with($part, 'DTSTART:')) {
                 $startDate = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, \mb_substr($part, 8));
+                if ($startDate === false) {
+                    throw new \InvalidArgumentException('Invalid start date string ' . $part);
+                }
             } elseif (\str_starts_with($part, 'DTEND:')) {
-                $startDate = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, \mb_substr($part, 6));
+                $endDate = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, \mb_substr($part, 6));
+                if ($endDate === false) {
+                    throw new \InvalidArgumentException('Invalid end date string ' . $part);
+                }
             } elseif (\str_starts_with($part, 'DURATION:')) {
-                $startDate = new \DateInterval(\mb_substr($part, 9));
+                $duration = new \DateInterval(\mb_substr($part, 9));
             } elseif (\str_starts_with($part, 'RRULE:')) {
                 $recurrenceRule = RecurrenceRule::fromString($part);
             } elseif (\str_starts_with($part, 'RDATE;')) {
-                $recurrenceRule = RecurrenceDateTimes::fromString($part);
+                $recurrenceDatesTimes = RecurrenceDateTimes::fromString($part);
             } elseif (\str_starts_with($part, 'EXDATE;')) {
-                $recurrenceRule = ExceptionDateTimes::fromString($part);
+                $exceptionDateTimes = ExceptionDateTimes::fromString($part);
             }
         }
 
@@ -87,17 +93,25 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
         );
     }
 
+    /**
+     * @param array<string,mixed> $values
+     */
     public static function fromArray(array $values): self
     {
         $values = array_filter($values);
         if (!array_key_exists('startDate', $values)) {
-            throw StartDateIsMissing::butWasRequired(\json_encode($values));
+            throw StartDateIsMissing::butWasRequired(\json_encode($values) ?: '[invalid JSON]');
         }
-
         $startDate = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $values['startDate']);
+        if ($startDate === false) {
+            throw new \InvalidArgumentException('Invalid start date string ' . $values['startDate']);
+        }
         $endDate = array_key_exists('endDate', $values)
             ? \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $values['endDate'])
             : null;
+        if ($endDate === false) {
+            throw new \InvalidArgumentException('Invalid end date string ' . $values['endDate']);
+        }
 
         $duration = array_key_exists('duration', $values)
             ? new \DateInterval($values['duration'])

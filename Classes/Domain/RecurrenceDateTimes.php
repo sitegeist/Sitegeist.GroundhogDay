@@ -33,11 +33,15 @@ final readonly class RecurrenceDateTimes implements \JsonSerializable, \Stringab
         $dateTimes = [];
         foreach (\explode(',', \mb_substr($value, 6)) as $part) { // RDATE;
             [$timeZoneDeclaration, $dateString] = explode(':', $part);
-            $dateTimes[] = \DateTimeImmutable::createFromFormat(
+            $dateTime = \DateTimeImmutable::createFromFormat(
                 EventOccurrenceSpecification::DATE_FORMAT,
                 $dateString,
                 new \DateTimeZone(\mb_substr($timeZoneDeclaration, 5)) // TZID=
             );
+            if ($dateTime === false) {
+                throw new \Exception('Invalid date string ' . $dateString);
+            }
+            $dateTimes[] = $dateTime;
         }
 
         return new self(...$dateTimes);

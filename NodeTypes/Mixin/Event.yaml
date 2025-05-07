@@ -7,6 +7,7 @@
       groups:
         event:
           label: i18n
+          icon: 'calendar-day'
   properties:
     occurrence:
       type: Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification

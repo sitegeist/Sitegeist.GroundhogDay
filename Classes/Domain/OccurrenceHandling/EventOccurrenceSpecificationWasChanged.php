@@ -2,21 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\GroundhogDay\Domain;
+namespace Sitegeist\GroundhogDay\Domain\OccurrenceHandling;
 
 use Neos\ContentRepository\Domain\NodeAggregate\NodeAggregateIdentifier;
 use Neos\Flow\Annotations as Flow;
+use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
 
 /**
- * The event describing that a (calendar) event was created
+ * The event describing that the occurrence specification of an event was changed.
  */
 #[Flow\Proxy(false)]
-final readonly class EventWasCreated
+final readonly class EventOccurrenceSpecificationWasChanged
 {
     public function __construct(
         public NodeAggregateIdentifier $eventId,
         public NodeAggregateIdentifier $calendarId,
         public EventOccurrenceSpecification $occurrenceSpecification,
+        public \DateTimeImmutable $dateOfChange,
     ) {
     }
 
@@ -24,7 +26,8 @@ final readonly class EventWasCreated
         NodeAggregateIdentifier $eventId,
         NodeAggregateIdentifier $calendarId,
         EventOccurrenceSpecification $occurrenceSpecification,
+        \DateTimeImmutable $dateOfChange,
     ): self {
-        return new self($eventId, $calendarId, $occurrenceSpecification);
+        return new self($eventId, $calendarId, $occurrenceSpecification, $dateOfChange);
     }
 }

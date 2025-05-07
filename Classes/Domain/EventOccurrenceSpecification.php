@@ -8,8 +8,6 @@ use Neos\Flow\Annotations as Flow;
 use Recurr\Rule;
 use Recurr\Transformer\ArrayTransformer;
 use Recurr\Transformer\Constraint\BeforeConstraint;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceDateTimes;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
 
 #[Flow\Proxy(false)]
 final readonly class EventOccurrenceSpecification implements \JsonSerializable, \Stringable
@@ -91,8 +89,6 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
 
     public static function fromArray(array $values): self
     {
-        \Neos\Flow\var_dump($values);
-        exit();
         if (!array_key_exists('startDate', $values)) {
             throw StartDateIsMissing::butWasRequired(\json_encode($values));
         }

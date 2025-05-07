@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\GroundhogDay\Domain;
+namespace Sitegeist\GroundhogDay\Domain\OccurrenceHandling;
 
 use Neos\ContentRepository\Domain\NodeAggregate\NodeAggregateIdentifier;
 use Neos\Flow\Annotations as Flow;

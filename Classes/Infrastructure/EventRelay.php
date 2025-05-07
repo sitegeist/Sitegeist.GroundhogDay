@@ -12,10 +12,10 @@ use Neos\ContentRepository\Exception\NodeException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Neos\Domain\Service\ContentContextFactory;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
-use Sitegeist\GroundhogDay\Domain\EventOccurrenceZookeeper;
+use Sitegeist\GroundhogDay\Domain\OccurrenceHandling\EventOccurrenceZookeeper;
 use Sitegeist\GroundhogDay\Domain\EventWasCreated;
-use Sitegeist\GroundhogDay\Domain\EventWasRemoved;
-use Sitegeist\GroundhogDay\Domain\Recurrence\EventOccurrenceSpecificationWasChanged;
+use Sitegeist\GroundhogDay\Domain\OccurrenceHandling\EventWasRemoved;
+use Sitegeist\GroundhogDay\Domain\OccurrenceHandling\EventOccurrenceSpecificationWasChanged;
 
 /**
  * The event relay infrastructure service

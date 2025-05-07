@@ -17,14 +17,14 @@ use Sitegeist\GroundhogDay\Domain\EventOccurrence;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceRepository;
 use Sitegeist\GroundhogDay\Domain\EventOccurrences;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
-use Sitegeist\GroundhogDay\Domain\EventOccurrenceZookeeper;
-use Sitegeist\GroundhogDay\Domain\EventWasCreated;
-use Sitegeist\GroundhogDay\Domain\EventWasRemoved;
 use Sitegeist\GroundhogDay\Domain\ExceptionDateTimes;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceDateTimes;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
-use Sitegeist\GroundhogDay\Domain\Recurrence\EventOccurrenceSpecificationWasChanged;
-use Sitegeist\GroundhogDay\Domain\TimeHasPassed;
+use Sitegeist\GroundhogDay\Domain\RecurrenceDateTimes;
+use Sitegeist\GroundhogDay\Domain\RecurrenceRule;
+use Sitegeist\GroundhogDay\Domain\OccurrenceHandling\EventOccurrenceZookeeper;
+use Sitegeist\GroundhogDay\Domain\OccurrenceHandling\EventOccurrenceSpecificationWasChanged;
+use Sitegeist\GroundhogDay\Domain\OccurrenceHandling\EventWasCreated;
+use Sitegeist\GroundhogDay\Domain\OccurrenceHandling\EventWasRemoved;
+use Sitegeist\GroundhogDay\Domain\OccurrenceHandling\TimeHasPassed;
 
 /**
  * @phpstan-type ExpectedEventOccurrencesWithinPeriod array{calendarId: NodeAggregateIdentifier, startDate: \DateTimeImmutable, endDate: \DateTimeImmutable, occurrences: EventOccurrences}

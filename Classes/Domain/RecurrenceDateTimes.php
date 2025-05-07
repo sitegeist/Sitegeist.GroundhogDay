@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\GroundhogDay\Domain\Recurrence;
+namespace Sitegeist\GroundhogDay\Domain;
 
 use Neos\Flow\Annotations as Flow;
-use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
 
 /**
  * @see https://icalendar.org/iCalendar-RFC-5545/3-8-5-2-recurrence-date-times.html

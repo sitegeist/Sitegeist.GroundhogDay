@@ -9,8 +9,8 @@ use PHPUnit\Framework\TestCase;
 use Sitegeist\GroundhogDay\Domain\EventDates;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
 use Sitegeist\GroundhogDay\Domain\ExceptionDateTimes;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceDateTimes;
-use Sitegeist\GroundhogDay\Domain\Recurrence\RecurrenceRule;
+use Sitegeist\GroundhogDay\Domain\RecurrenceDateTimes;
+use Sitegeist\GroundhogDay\Domain\RecurrenceRule;
 
 class EventOccurrenceSpecificationTest extends TestCase
 {

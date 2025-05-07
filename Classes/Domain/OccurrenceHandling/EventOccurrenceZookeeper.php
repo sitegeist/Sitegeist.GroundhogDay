@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\GroundhogDay\Domain;
+namespace Sitegeist\GroundhogDay\Domain\OccurrenceHandling;
 
 use Neos\Flow\Annotations as Flow;
-use Sitegeist\GroundhogDay\Domain\Recurrence\EventOccurrenceSpecificationWasChanged;
+use Sitegeist\GroundhogDay\Domain\EventOccurrenceRepository;
 
 /**
  * The event date zookeeper, implementing the policy that whenever

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\GroundhogDay\Domain\Recurrence;
+namespace Sitegeist\GroundhogDay\Domain;
 
 use Neos\Flow\Annotations as Flow;
 

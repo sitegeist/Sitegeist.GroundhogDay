@@ -113,19 +113,21 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
             throw new \InvalidArgumentException('Invalid end date string ' . $values['endDate']);
         }
 
-        $duration = array_key_exists('duration', $values)
-            ? new \DateInterval($values['duration'])
-            : null;
-
-        $recurrenceRule = array_key_exists('recurrenceRule', $values)
-            ? RecurrenceRule::fromString($values['recurrenceRule'])
-            : null;
-
         return self::create(
-            $startDate,
-            $endDate,
-            $duration,
-            $recurrenceRule,
+            startDate: $startDate,
+            endDate: $endDate,
+            duration: array_key_exists('duration', $values)
+                ? new \DateInterval($values['duration'])
+                : null,
+            recurrenceRule: array_key_exists('recurrenceRule', $values)
+                ? RecurrenceRule::fromString($values['recurrenceRule'])
+                : null,
+            recurrenceDatesTimes: array_key_exists('recurrenceDatesTimes', $values)
+                ? RecurrenceDateTimes::fromArray($values['recurrenceDatesTimes'])
+                : null,
+            exceptionDateTimes: array_key_exists('exceptionDateTimes', $values)
+                ? ExceptionDateTimes::fromArray($values['exceptionDateTimes'])
+                : null,
         );
     }
 

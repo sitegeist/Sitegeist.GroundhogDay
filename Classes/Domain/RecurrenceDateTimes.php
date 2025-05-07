@@ -47,6 +47,23 @@ final readonly class RecurrenceDateTimes implements \JsonSerializable, \Stringab
         return new self(...$dateTimes);
     }
 
+    /**
+     * @param array<string> $values
+     */
+    public static function fromArray(array $values): self
+    {
+        $dateTimes = [];
+        foreach ($values as $value) {
+            $dateTime = \DateTimeImmutable::createFromFormat(EventOccurrenceSpecification::DATE_FORMAT, $value);
+            if ($dateTime === false) {
+                throw new \InvalidArgumentException('Invalid date string ' . $value);
+            }
+            $dateTimes[] = $dateTime;
+        }
+
+        return new self(...$dateTimes);
+    }
+
     public function isEmpty(): bool
     {
         return empty($this->items);

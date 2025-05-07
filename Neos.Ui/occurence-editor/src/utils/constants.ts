@@ -2,6 +2,8 @@ import { Frequency } from "rrule"
 
 export type I18nFn = (key: string) => string;
 
+export const COMMIT_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'"
+
 const BASE = 'Sitegeist.GroundhogDay:NodeTypes.Mixin.Event';
 
 export const getOccurenceMethodOptions = (i18n: I18nFn) => [

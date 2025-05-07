@@ -6,6 +6,7 @@ import { OccurenceProvider } from './context/OccurenceContext'
 import { OccurenceCommitObject, OccurenceState } from './types'
 import { normalizeDates } from './utils/normalizeRecurrenceDates'
 import { format } from 'date-fns'
+import { COMMIT_DATE_FORMAT } from './utils/constants'
 
 export function registerOccurenceEditor(globalRegistry: IGlobalRegistry): void {
     const inspectorRegistry = globalRegistry.get('inspector')
@@ -28,11 +29,13 @@ export function registerOccurenceEditor(globalRegistry: IGlobalRegistry): void {
 
             const handleCommit = (occurence: OccurenceState) => {
                 const occurenceCommit: OccurenceCommitObject = {
-                    startDate: format(occurence.startDate ?? new Date, 'YmdHisp'),
-                    endDate: occurence.endDate && format(occurence.endDate, 'YmdHisp'),
+                    startDate: format(occurence.startDate ?? new Date, COMMIT_DATE_FORMAT),
+                    endDate: occurence.endDate && format(occurence.endDate, COMMIT_DATE_FORMAT),
                     recurrenceRule: occurence.recurrenceRule?.toString() ?? undefined,
                     recurrenceDates: normalizeDates(occurence.recurrenceDates)
                 }
+
+                console.log(occurenceCommit);
 
                 commit(occurenceCommit);
             }

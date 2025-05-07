@@ -58,6 +58,18 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
             );
     }
 
+    public function resolveDuration(): ?\DateInterval
+    {
+        if ($this->duration) {
+            return $this->duration;
+        }
+        if ($this->endDate) {
+            return $this->startDate->diff($this->endDate);
+        }
+
+        return null;
+    }
+
     /**
      * @return array<int,EventDates>
      */
@@ -130,13 +142,7 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
 
     public function completeDate(\DateTimeImmutable $startDate): EventDates
     {
-        $duration = $this->duration
-            ?: (
-                $this->endDate
-                    ? $this->startDate->diff($this->endDate)
-                    : null
-            );
-
+        $duration = $this->resolveDuration();
         $endDate = $duration ? $startDate->add($duration) : $startDate;
 
         return new EventDates(

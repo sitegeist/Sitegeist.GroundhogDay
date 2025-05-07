@@ -8,10 +8,10 @@ export type OccurenceState = {
 }
 
 export type OccurenceCommitObject = {
-    startDate?: Date,
-    endDate?: Date,
+    startDate: string,
+    endDate?: string,
     recurrenceRule?: string,
-    recurrenceDates?: Date[],
+    recurrenceDates?: string[],
 }
 
 export type Props<T> = {

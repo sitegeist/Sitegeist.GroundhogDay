@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-export const EditorContainer = styled.div`
+export const EditorContainer = styled.div<{ disabled?: boolean }>`
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -9,12 +9,9 @@ export const EditorContainer = styled.div`
 
     .tabs-nav-item {
         flex-grow: 0;
-    }
-
-    .tabs-nav-item {
         width: 50%;
     }
-    
+
     .tabs-nav-item-btn {
         width: 100%;
     }
@@ -26,7 +23,17 @@ export const EditorContainer = styled.div`
     .select-tdy-btn {
         display: none;
     }
-`
+
+    ${({ disabled }) =>
+        disabled &&
+        `
+            cursor: not-allowed;
+            opacity: .5;
+            > * {
+                pointer-events: none;
+            }
+        `}
+`;
 
 export const Container = styled.div`
     width: 100%;

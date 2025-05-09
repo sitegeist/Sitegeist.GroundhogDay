@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { OccurenceMethod } from '../types'
+import { OccurenceEditorOptions, OccurenceMethod } from '../types'
 import { RRuleEditor } from './RRuleEditor'
 import { useOccurence } from '../context/OccurenceContext'
 import { EventDatesEditor } from './EventDatesEditor'
@@ -11,11 +11,20 @@ import { getInitialOccurenceMethod } from '../utils/getInitialOccurenceMethod'
 import { Frequency, RRule } from 'rrule'
 import { MultiDateInput } from '@sitegeist/groundhogday-multi-date-input'
 
-export const OcurrenceEditor = () => {
+interface OccurenceEditorProps {
+    options: OccurenceEditorOptions
+}
+
+export const OcurrenceEditor = ({options}: OccurenceEditorProps) => {
     const { occurence, setRRule, resetRRule, setRecurrencDates, setExceptionDates } = useOccurence();
     const i18n = useI18n();
 
     const [occurenceMethod, setOccurenceMethod] = useState<OccurenceMethod>(getInitialOccurenceMethod(occurence));
+    const [readonly, setReadonly] = useState<boolean>(options.disabled)
+
+    useEffect(() => {
+        setReadonly(options.disabled);
+    }, [options.disabled]);
 
     useEffect(() => {
         const initialMethod = getInitialOccurenceMethod(occurence);
@@ -46,10 +55,10 @@ export const OcurrenceEditor = () => {
     }
 
     return (
-        <EditorContainer>
+        <EditorContainer disabled={readonly}>
             <EventDatesEditor />
             <Label>{i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.repeat')}</Label>
-            <SelectBox 
+            <SelectBox
                 options={getOccurenceMethodOptions(i18n)}
                 value={occurenceMethod}
                 onValueChange={handleOccurenceChange}

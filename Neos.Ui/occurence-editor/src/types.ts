@@ -48,3 +48,7 @@ export enum YearlyFrequencyType {
     BYMONTHS = 'bymonths',
     BYSETPOS = 'bysetpos',
 }
+
+export type OccurenceEditorOptions = {
+    disabled: boolean;
+}

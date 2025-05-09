@@ -25,7 +25,7 @@ export function registerOccurenceEditor(globalRegistry: IGlobalRegistry): void {
 
     editorsRegistry.set('Sitegeist.Groundhogday/Inspector/Editors/OccurenceEditor', {
         component: (props: any) => {
-            const { value, commit, ...rest } = props;
+            const { value, commit, options } = props;
 
             const handleCommit = (occurence: OccurenceState) => {
                 const occurenceCommit: OccurenceCommitObject = {
@@ -46,7 +46,7 @@ export function registerOccurenceEditor(globalRegistry: IGlobalRegistry): void {
             return (
                 <NeosContext.Provider value={{globalRegistry}}>
                     <OccurenceProvider value={value} onCommit={handleCommit}>
-                        <OcurrenceEditor {...rest} />
+                        <OcurrenceEditor options={options} />
                     </OccurenceProvider>
                 </NeosContext.Provider>
             )

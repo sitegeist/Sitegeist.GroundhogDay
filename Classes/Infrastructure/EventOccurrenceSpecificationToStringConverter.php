@@ -38,6 +38,6 @@ class EventOccurrenceSpecificationToStringConverter extends AbstractTypeConverte
         array $convertedChildProperties = [],
         ?PropertyMappingConfigurationInterface $configuration = null
     ) {
-        return $source->toString();
+        return \json_encode($source, JSON_THROW_ON_ERROR);
     }
 }

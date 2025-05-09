@@ -8,29 +8,31 @@ use Neos\Flow\Property\PropertyMappingConfigurationInterface;
 use Neos\Flow\Property\TypeConverter\AbstractTypeConverter;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
 
-class EventOccurrenceSpecificationToArrayConverter extends AbstractTypeConverter
+class StringToDateTimeZoneConverter extends AbstractTypeConverter
 {
     /**
      * @var array<int,string>
      */
-    protected $sourceTypes = [EventOccurrenceSpecification::class];
+    protected $sourceTypes = ['string'];
 
     /**
+     * The target type this converter can convert to.
+     *
      * @var string
      * @api
      */
-    protected $targetType = 'array';
+    protected $targetType = \DateTimeZone::class;
 
     /**
      * @var integer
      */
-    protected $priority = 10;
+    protected $priority = 1;
 
     /**
-     * @param EventOccurrenceSpecification $source
+     * @param string $source
      * @param string $targetType,
      * @param array<mixed> $convertedChildProperties
-     * @return string
+     * @return ?\DateTimeZone
      */
     public function convertFrom(
         $source,
@@ -38,6 +40,10 @@ class EventOccurrenceSpecificationToArrayConverter extends AbstractTypeConverter
         array $convertedChildProperties = [],
         ?PropertyMappingConfigurationInterface $configuration = null
     ) {
-        return \json_encode($source, JSON_THROW_ON_ERROR);
+        try {
+            return new \DateTimeZone($source);
+        } catch (\Exception) {
+            return null;
+        }
     }
 }

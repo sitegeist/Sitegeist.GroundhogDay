@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Sitegeist\GroundhogDay\Tests\Functional\Domain;
 
+use DateTimeZone;
 use Neos\ContentRepository\Domain\Model\NodeData;
 use Neos\ContentRepository\Domain\Model\Workspace;
 use Neos\ContentRepository\Domain\NodeAggregate\NodeAggregateIdentifier;
@@ -13,6 +14,7 @@ use Neos\Flow\Persistence\Doctrine\PersistenceManager;
 use Neos\Flow\Persistence\Doctrine\Service as DoctrineService;
 use Neos\Flow\Tests\FunctionalTestCase;
 use PHPUnit\Framework\Assert;
+use Sitegeist\GroundhogDay\Domain\DateTimeSpecification;
 use Sitegeist\GroundhogDay\Domain\EventOccurrence;
 use Sitegeist\GroundhogDay\Domain\EventOccurrenceRepository;
 use Sitegeist\GroundhogDay\Domain\EventOccurrences;
@@ -55,8 +57,11 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
 
         $writeSubject->whenEventWasCreated($event);
 
-        self::assertEqualEventOccurrencesWithinPeriod($expectedEventOccurrencesWithinPeriod, $readSubject);
-        self::assertEqualEventOccurrencesByEventId($expectedEventOccurrencesByEventId, $readSubject);
+        /** @todo vary */
+        $timeZone = new DateTimeZone('UTC');
+
+        self::assertEqualEventOccurrencesWithinPeriod($expectedEventOccurrencesWithinPeriod, $readSubject, $timeZone);
+        self::assertEqualEventOccurrencesByEventId($expectedEventOccurrencesByEventId, $readSubject, $timeZone);
 
     }
 
@@ -74,8 +79,9 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    self::createDateTime('2025-04-24 14:30:00'),
-                )
+                    DateTimeSpecification::fromString('20250424T143000'),
+                ),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'expectedEventOccurrencesWithinPeriod' => [
                 [
@@ -110,9 +116,10 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-04-24 14:30:00'),
+                    startDate: DateTimeSpecification::fromString('20250424T143000'),
                     recurrenceRule: RecurrenceRule::fromString('RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
-                )
+                ),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'expectedEventOccurrencesWithinPeriod' => [
                 [
@@ -202,13 +209,14 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-04-24 14:30:00'),
+                    startDate: DateTimeSpecification::fromString('20250424T143000'),
                     recurrenceRule: RecurrenceRule::fromString('RRULE:FREQ=DAILY;INTERVAL=10;COUNT=3'),
                     recurrenceDatesTimes: RecurrenceDateTimes::create(
-                        self::createDateTime('2025-05-04 14:30:00'),
-                        self::createDateTime('2025-05-05 15:15:00'),
+                        DateTimeSpecification::fromString('20250504T143000'),
+                        DateTimeSpecification::fromString('20250505T151500'),
                     )
-                )
+                ),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'expectedEventOccurrencesWithinPeriod' => [
                 [
@@ -298,17 +306,18 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-04-24 14:30:00'),
+                    startDate: DateTimeSpecification::fromString('20250424T143000'),
                     recurrenceRule: RecurrenceRule::fromString('RRULE:FREQ=DAILY;INTERVAL=10;COUNT=4'),
                     recurrenceDatesTimes: RecurrenceDateTimes::create(
-                        self::createDateTime('2025-05-04 14:30:00'),
-                        self::createDateTime('2025-05-05 15:15:00'),
+                        DateTimeSpecification::fromString('20250504T143000'),
+                        DateTimeSpecification::fromString('20250505T151500'),
                     ),
                     exceptionDateTimes: ExceptionDateTimes::create(
-                        self::createDateTime('2025-05-04 14:30:00'),
-                        self::createDateTime('2025-05-14 14:30:00'),
+                        DateTimeSpecification::fromString('20250504T143000'),
+                        DateTimeSpecification::fromString('20250514T143000'),
                     )
-                )
+                ),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'expectedEventOccurrencesWithinPeriod' => [
                 [
@@ -388,9 +397,10 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-05-01 14:30:00'),
+                    startDate: DateTimeSpecification::fromString('20250501T143000'),
                     recurrenceRule: RecurrenceRule::fromString('RRULE:FREQ=MONTHLY;BYMONTHDAY=1'),
                 ),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'expectedEventOccurrencesWithinPeriod' => [
                 [
@@ -515,18 +525,19 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-06-19 08:00:00'),
-                    endDate: self::createDateTime('2025-06-20 16:00:00'),
+                    startDate: DateTimeSpecification::fromString('20250619T080000'),
+                    endDate: DateTimeSpecification::fromString('20250620T160000'),
                     recurrenceRule: RecurrenceRule::fromString('RRULE:FREQ=DAILY;INTERVAL=1;COUNT=5'),
                     recurrenceDatesTimes: RecurrenceDateTimes::create(
-                        self::createDateTime('2025-06-20 08:00:00'),
-                        self::createDateTime('2025-06-20 10:00:00'),
+                        DateTimeSpecification::fromString('20250620T080000'),
+                        DateTimeSpecification::fromString('20250620T100000'),
                     ),
                     exceptionDateTimes: ExceptionDateTimes::create(
-                        self::createDateTime('2025-06-20 08:00:00'),
-                        self::createDateTime('2025-06-21 08:00:00'),
+                        DateTimeSpecification::fromString('20250620T080000'),
+                        DateTimeSpecification::fromString('20250621T080000'),
                     )
-                )
+                ),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'expectedEventOccurrencesWithinPeriod' => [
                 [
@@ -646,8 +657,11 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
         $writeSubject->whenEventWasCreated($previousStateEvent);
         $writeSubject->whenEventOccurrenceSpecificationWasChanged($event);
 
-        self::assertEqualEventOccurrencesWithinPeriod($expectedEventOccurrencesWithinPeriod, $readSubject);
-        self::assertEqualEventOccurrencesByEventId($expectedEventOccurrencesByEventId, $readSubject);
+        /** @todo vary */
+        $timeZone = new DateTimeZone('UTC');
+
+        self::assertEqualEventOccurrencesWithinPeriod($expectedEventOccurrencesWithinPeriod, $readSubject, $timeZone);
+        self::assertEqualEventOccurrencesByEventId($expectedEventOccurrencesByEventId, $readSubject, $timeZone);
     }
 
     /**
@@ -665,18 +679,20 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-04-24 14:30:00'),
+                    startDate: DateTimeSpecification::fromString('20250424T143000'),
                     recurrenceRule: RecurrenceRule::fromString('RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
-                )
+                ),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
-            'event' => new EventOccurrenceSpecificationWasChanged(
+            'event' => EventOccurrenceSpecificationWasChanged::create(
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-04-24 15:00:00'),
+                    startDate: DateTimeSpecification::fromString('20250424T150000'),
                     recurrenceRule: RecurrenceRule::fromString('RRULE:FREQ=DAILY;INTERVAL=7;COUNT=5'),
                 ),
                 dateOfChange: self::createDateTime('2025-05-14 14:00:00'),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'expectedEventOccurrencesWithinPeriod' => [
                 [
@@ -761,18 +777,20 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
                 NodeAggregateIdentifier::fromString('my-event'),
                 NodeAggregateIdentifier::fromString('my-calendar'),
                 EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-04-24 14:30:00'),
+                    startDate: DateTimeSpecification::fromString('20250424T143000'),
                     recurrenceRule: RecurrenceRule::fromString('RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
-                )
+                ),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
-            'event' => new EventOccurrenceSpecificationWasChanged(
+            'event' => EventOccurrenceSpecificationWasChanged::create(
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-04-24 14:30:00'),
+                    startDate: DateTimeSpecification::fromString('20250424T143000'),
                     recurrenceRule: null,
                 ),
                 dateOfChange: self::createDateTime('2025-05-14 14:00:00'),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'expectedEventDatesWithinPeriod' => [
                 [
@@ -830,23 +848,25 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-04-30 14:30:00'),
+                    startDate: DateTimeSpecification::fromString('20250430T143000'),
                     recurrenceDatesTimes: RecurrenceDateTimes::create(
-                        self::createDateTime('2025-05-02 14:30:00'),
+                        DateTimeSpecification::fromString('20250502T143000'),
                     )
                 ),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'event' => EventOccurrenceSpecificationWasChanged::create(
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-04-30 14:30:00'),
+                    startDate: DateTimeSpecification::fromString('20250430T143000'),
                     recurrenceDatesTimes: RecurrenceDateTimes::create(
-                        self::createDateTime('2025-05-02 15:30:00'),
-                        self::createDateTime('2025-05-03 14:30:00'),
+                        DateTimeSpecification::fromString('20250502T153000'),
+                        DateTimeSpecification::fromString('20250503T143000'),
                     ),
                 ),
                 dateOfChange: self::createDateTime('2025-04-30 11:00:00'),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'expectedEventOccurrencesWithinPeriod' => [
                 [
@@ -908,21 +928,23 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-04-30 14:30:00'),
+                    startDate: DateTimeSpecification::fromString('20250430T143000'),
                     recurrenceDatesTimes: RecurrenceDateTimes::create(
-                        self::createDateTime('2025-05-02 14:30:00'),
-                        self::createDateTime('2025-05-04 14:30:00'),
+                        DateTimeSpecification::fromString('20250502T143000'),
+                        DateTimeSpecification::fromString('20250504T143000'),
                     )
-                )
+                ),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'event' => EventOccurrenceSpecificationWasChanged::create(
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-04-30 14:30:00'),
+                    startDate: DateTimeSpecification::fromString('20250430T143000'),
                     recurrenceDatesTimes: null,
                 ),
                 dateOfChange: self::createDateTime('2025-05-03 11:00:00'),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'expectedEventDatesWithinPeriod' => [
                 [
@@ -1004,8 +1026,11 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
         $writeSubject->whenEventWasCreated($previousStateEvent);
         $writeSubject->whenTimeHasPassed($event);
 
-        self::assertEqualEventOccurrencesWithinPeriod($expectedEventOccurrencesWithinPeriod, $readSubject);
-        self::assertEqualEventOccurrencesByEventId($expectedEventOccurrencesByEventId, $readSubject);
+        /** @todo vary */
+        $timeZone = new DateTimeZone('UTC');
+
+        self::assertEqualEventOccurrencesWithinPeriod($expectedEventOccurrencesWithinPeriod, $readSubject, $timeZone);
+        self::assertEqualEventOccurrencesByEventId($expectedEventOccurrencesByEventId, $readSubject, $timeZone);
     }
 
     /**
@@ -1023,9 +1048,10 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-05-01 14:30:00'),
+                    startDate: DateTimeSpecification::fromString('20250501T143000'),
                     recurrenceRule: RecurrenceRule::fromString('RRULE:FREQ=MONTHLY;BYMONTHDAY=1'),
-                )
+                ),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'event' => TimeHasPassed::create(
                 self::createDateTime('2025-11-17 13:48:27'),
@@ -1218,8 +1244,11 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
         $writeSubject->whenEventWasCreated($previousStateEvent);
         $writeSubject->whenEventWasRemoved($event);
 
-        self::assertEqualEventOccurrencesWithinPeriod($expectedEventOccurrencesWithinPeriod, $readSubject);
-        self::assertEqualEventOccurrencesByEventId($expectedEventOccurrencesByEventId, $readSubject);
+        /** @todo vary */
+        $timeZone = new DateTimeZone('UTC');
+
+        self::assertEqualEventOccurrencesWithinPeriod($expectedEventOccurrencesWithinPeriod, $readSubject, $timeZone);
+        self::assertEqualEventOccurrencesByEventId($expectedEventOccurrencesByEventId, $readSubject, $timeZone);
     }
 
     /**
@@ -1237,9 +1266,10 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
                 eventId: NodeAggregateIdentifier::fromString('my-event'),
                 calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
                 occurrenceSpecification: EventOccurrenceSpecification::create(
-                    startDate: self::createDateTime('2025-04-24 14:30:00'),
+                    startDate: DateTimeSpecification::fromString('20250404T143000'),
                     recurrenceRule: RecurrenceRule::fromString('RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5'),
-                )
+                ),
+                locationTimezone: new \DateTimeZone('UTC'),
             ),
             'event' => new EventWasRemoved(
                 NodeAggregateIdentifier::fromString('my-event'),
@@ -1276,11 +1306,11 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
     /**
      * @param list<ExpectedEventOccurrencesWithinPeriod> $expectedEventOccurrencesWithinPeriod
      */
-    private static function assertEqualEventOccurrencesWithinPeriod(array $expectedEventOccurrencesWithinPeriod, EventOccurrenceRepository $readSubject, ?\DateTimeZone $timeZone = null): void
+    private static function assertEqualEventOccurrencesWithinPeriod(array $expectedEventOccurrencesWithinPeriod, EventOccurrenceRepository $readSubject, \DateTimeZone $timeZone): void
     {
         foreach ($expectedEventOccurrencesWithinPeriod as $testRecord) {
             $expected = iterator_to_array($testRecord['occurrences']);
-            $actual = iterator_to_array($readSubject->findEventOccurrencesWithinPeriod($testRecord['calendarId'], $testRecord['startDate'], $testRecord['endDate']));
+            $actual = iterator_to_array($readSubject->findEventOccurrencesWithinPeriod($testRecord['calendarId'], $testRecord['startDate'], $testRecord['endDate'], $timeZone));
             Assert::assertEquals(
                 $expected,
                 $actual,
@@ -1293,7 +1323,7 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
     /**
      * @param list<ExpectedEventOccurrencesWithinPeriod> $expectedEventOccurrencesByEventId
      */
-    private static function assertEqualEventOccurrencesByEventId(array $expectedEventOccurrencesByEventId, EventOccurrenceRepository $readSubject, ?\DateTimeZone $timeZone = null): void
+    private static function assertEqualEventOccurrencesByEventId(array $expectedEventOccurrencesByEventId, EventOccurrenceRepository $readSubject, \DateTimeZone $timeZone): void
     {
         foreach ($expectedEventOccurrencesByEventId as $testRecord) {
             $expected = iterator_to_array($testRecord['occurrences']);
@@ -1308,7 +1338,7 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
         }
     }
 
-    private static function createDateTime(string $date, ?\DateTimeZone $timeZone = null): \DateTimeImmutable
+    private static function createDateTime(string $date, ?\DateTimeZone $timeZone = new \DateTimeZone('UTC')): \DateTimeImmutable
     {
         return \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $date, $timeZone);
     }

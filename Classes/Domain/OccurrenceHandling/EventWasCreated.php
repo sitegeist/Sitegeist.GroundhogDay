@@ -18,6 +18,7 @@ final readonly class EventWasCreated
         public NodeAggregateIdentifier $eventId,
         public NodeAggregateIdentifier $calendarId,
         public EventOccurrenceSpecification $occurrenceSpecification,
+        public \DateTimeZone $locationTimezone,
     ) {
     }
 
@@ -25,7 +26,13 @@ final readonly class EventWasCreated
         NodeAggregateIdentifier $eventId,
         NodeAggregateIdentifier $calendarId,
         EventOccurrenceSpecification $occurrenceSpecification,
+        \DateTimeZone $locationTimezone,
     ): self {
-        return new self($eventId, $calendarId, $occurrenceSpecification);
+        return new self(
+            eventId: $eventId,
+            calendarId: $calendarId,
+            occurrenceSpecification: $occurrenceSpecification,
+            locationTimezone: $locationTimezone
+        );
     }
 }

@@ -12,10 +12,9 @@ use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
 use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\Doctrine\ConnectionFactory;
+use Sitegeist\GroundhogDay\Infrastructure\CalendarIsMissing;
 
 /**
- * @todo timezone support
- *
  * @phpstan-type DatabaseRow array{calendar_id: string, event_id: string, start_date: string, end_date: string}
  */
 #[Flow\Scope('singleton')]
@@ -42,7 +41,7 @@ final class EventOccurrenceRepository
         NodeAggregateIdentifier $calendarId,
         \DateTimeImmutable $startDate,
         \DateTimeImmutable $endDate,
-        ?\DateTimeZone $timeZone = null
+        \DateTimeZone $timeZone,
     ): iterable {
         /** @var array<int,DatabaseRow> $rows */
         $rows = $this->databaseConnection->executeQuery(
@@ -65,7 +64,7 @@ final class EventOccurrenceRepository
      */
     public function findEventOccurrencesByEventId(
         NodeAggregateIdentifier $eventId,
-        ?\DateTimeZone $timeZone = null,
+        \DateTimeZone $timeZone,
     ): iterable {
         /** @var array<int,DatabaseRow> $rows */
         $rows = $this->databaseConnection->executeQuery(
@@ -87,7 +86,7 @@ final class EventOccurrenceRepository
     public function findFutureEventOccurrencesByEventId(
         NodeAggregateIdentifier $eventId,
         \DateTimeImmutable $referenceDate,
-        ?\DateTimeZone $timeZone = null,
+        \DateTimeZone $timeZone,
     ): iterable {
         /** @var array<int,DatabaseRow> $rows */
         $rows = $this->databaseConnection->executeQuery(
@@ -129,8 +128,9 @@ final class EventOccurrenceRepository
         NodeAggregateIdentifier $eventId,
         NodeAggregateIdentifier $calendarId,
         EventOccurrenceSpecification $occurrenceSpecification,
+        \DateTimeZone $locationTimezone,
     ): void {
-        $dates = $occurrenceSpecification->resolveDates();
+        $dates = $occurrenceSpecification->resolveDates(null, null, $locationTimezone);
 
         $this->databaseConnection->transactional(function () use ($calendarId, $eventId, $dates) {
             foreach ($dates as $date) {
@@ -152,11 +152,12 @@ final class EventOccurrenceRepository
         NodeAggregateIdentifier $calendarId,
         EventOccurrenceSpecification $occurrenceSpecification,
         \DateTimeImmutable $referenceDate,
+        \DateTimeZone $locationTimezone,
     ): void {
-        $this->databaseConnection->transactional(function () use ($eventId, $calendarId, $occurrenceSpecification, $referenceDate) {
+        $this->databaseConnection->transactional(function () use ($eventId, $calendarId, $occurrenceSpecification, $referenceDate, $locationTimezone) {
             $this->removeAllFutureOccurrencesByEventId($eventId, $referenceDate);
 
-            foreach ($occurrenceSpecification->resolveDates($referenceDate) as $futureDate) {
+            foreach ($occurrenceSpecification->resolveDates($referenceDate, null, $locationTimezone) as $futureDate) {
                 $this->databaseConnection->insert(
                     self::TABLE_NAME,
                     [
@@ -192,13 +193,9 @@ final class EventOccurrenceRepository
             $occurrenceSpecification = $nodeDataRecord->getProperty('occurrence');
             if ($occurrenceSpecification instanceof EventOccurrenceSpecification && $occurrenceSpecification->recurrenceRule !== null) {
                 $eventId = $nodeDataRecord->getIdentifier();
-                $lastOccurrenceRecord = $this->findLastOccurrenceRecord(NodeAggregateIdentifier::fromString($eventId));
-                if (!$lastOccurrenceRecord) {
-                    // this is technically not correct, but resolving ancestors from event IDs is something for Neos 9
-                    continue;
-                }
-                $calendarId = $lastOccurrenceRecord['calendar_id'];
-                foreach ($occurrenceSpecification->resolveRecurrenceDates($referenceDate) as $date) {
+                $calendarId = $this->resolveCalendarId($nodeDataRecord);
+                $locationTimezone = $this->resolveLocationTimezone($nodeDataRecord);
+                foreach ($occurrenceSpecification->resolveRecurrenceDates($referenceDate, null, $locationTimezone) as $date) {
                     $this->databaseConnection->transactional(function () use ($eventId, $calendarId, $date) {
                         $countRow = $this->databaseConnection->executeQuery(
                             'SELECT COUNT(*) FROM ' . self::TABLE_NAME . ' WHERE event_id = :eventId AND start_date = :startDate',
@@ -226,38 +223,54 @@ final class EventOccurrenceRepository
     }
 
     /**
-     * @param DatabaseRow $row
+     * To be replaced by findParentNodeAggregates in Neos 9
+     * We assume that events are varied and moved on aggregate level relative to their calendar and location here
      */
-    private function mapDatabaseRowToEventOccurrence(array $row, ?\DateTimeZone $timeZone): EventOccurrence
+    private function resolveCalendarId(NodeData $eventNodeData): NodeAggregateIdentifier
     {
-        return new EventOccurrence(
-            NodeAggregateIdentifier::fromString($row['event_id']),
-            self::createDate($row['start_date'], $timeZone),
-            self::createDate($row['end_date'], $timeZone),
-        );
+        $calendarCandidate = $eventNodeData;
+        while ($calendarCandidate) {
+            if ($calendarCandidate->getNodeType()->isOfType('Sitegeist.GroundhogDay:Mixin.Calendar')) {
+                return NodeAggregateIdentifier::fromString($calendarCandidate->getIdentifier());
+            }
+            $calendarCandidate = $this->nodeDataRepository->findOneByPath($eventNodeData->getParentPath(), $eventNodeData->getWorkspace());
+        }
+        throw CalendarIsMissing::butWasRequired(NodeAggregateIdentifier::fromString($eventNodeData->getParentPath()));
     }
 
     /**
-     * @return ?DatabaseRow
+     * To be replaced by findParentNodeAggregates in Neos 9
+     * We assume that events are varied and moved on aggregate level here
      */
-    private function findLastOccurrenceRecord(NodeAggregateIdentifier $eventId): ?array
+    private function resolveLocationTimezone(NodeData $eventNodeData): \DateTimeZone
     {
-        /** @phpstan-ignore-next-line (array shenanigans) */
-        return $this->databaseConnection->executeQuery(
-            'SELECT * FROM ' . self::TABLE_NAME
-            . ' WHERE event_id = :eventId'
-            . ' ORDER BY start_date DESC'
-            . ' LIMIT 1',
-            [
-                'eventId' => (string)$eventId,
-            ]
-        )->fetchAssociative() ?: null;
+        $locationCandidate = $eventNodeData;
+        while ($locationCandidate) {
+            if ($locationCandidate->getNodeType()->isOfType('Sitegeist.GroundhogDay:Mixin.Location')) {
+                return $locationCandidate->getProperty('timezone') ?: new \DateTimeZone('UTC');
+            }
+            $locationCandidate = $this->nodeDataRepository->findOneByPath($eventNodeData->getParentPath(), $eventNodeData->getWorkspace());
+        }
+        throw CalendarIsMissing::butWasRequired(NodeAggregateIdentifier::fromString($eventNodeData->getParentPath()));
     }
 
-    private static function createDate(string $dateString, ?\DateTimeZone $timeZone): \DateTimeImmutable
+    /**
+     * @param DatabaseRow $row
+     */
+    private function mapDatabaseRowToEventOccurrence(array $row, \DateTimeZone $timeZone): EventOccurrence
+    {
+        return new EventOccurrence(
+            NodeAggregateIdentifier::fromString($row['event_id']),
+            self::createUTCDate($row['start_date'], $timeZone),
+            self::createUTCDate($row['end_date'], $timeZone),
+        );
+    }
+
+    private static function createUTCDate(string $dateString, \DateTimeZone $timeZone): \DateTimeImmutable
     {
         /** @var \DateTimeImmutable $result */
-        $result = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $dateString, $timeZone);
+        $result = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $dateString, new \DateTimeZone('UTC'));
+        $result = $result->setTimezone($timeZone);
 
         return $result;
     }

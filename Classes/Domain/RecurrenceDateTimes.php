@@ -8,43 +8,34 @@ use Neos\Flow\Annotations as Flow;
 
 /**
  * @see https://icalendar.org/iCalendar-RFC-5545/3-8-5-2-recurrence-date-times.html
- * @implements \IteratorAggregate<int,\DateTimeImmutable>
+ * @implements \IteratorAggregate<int,DateTimeSpecification>
  */
 #[Flow\Proxy(false)]
-final readonly class RecurrenceDateTimes implements \JsonSerializable, \Stringable, \IteratorAggregate
+final readonly class RecurrenceDateTimes implements \JsonSerializable, \IteratorAggregate
 {
     /**
-     * @var array<int,\DateTimeImmutable>
+     * @var array<int,DateTimeSpecification>
      */
     private array $items;
 
-    private function __construct(\DateTimeImmutable ...$items)
+    private function __construct(DateTimeSpecification ...$items)
     {
         $this->items = array_values($items);
     }
 
-    public static function create(\DateTimeImmutable ...$items): self
+    public static function create(DateTimeSpecification ...$items): self
     {
         return new self(...$items);
     }
 
     public static function fromString(string $value): self
     {
-        $dateTimes = [];
-        foreach (\explode(',', \mb_substr($value, 6)) as $part) { // RDATE;
-            [$timeZoneDeclaration, $dateString] = explode(':', $part);
-            $dateTime = \DateTimeImmutable::createFromFormat(
-                EventOccurrenceSpecification::DATE_FORMAT,
-                $dateString,
-                new \DateTimeZone(\mb_substr($timeZoneDeclaration, 5)) // TZID=
-            );
-            if ($dateTime === false) {
-                throw new \Exception('Invalid date string ' . $dateString);
-            }
-            $dateTimes[] = $dateTime;
+        $values = [];
+        foreach (\explode(',', \mb_substr($value, 6)) as $part) { // RDATE:
+            $values[] = DateTimeSpecification::fromString($part);
         }
 
-        return new self(...$dateTimes);
+        return new self(...$values);
     }
 
     /**
@@ -52,16 +43,10 @@ final readonly class RecurrenceDateTimes implements \JsonSerializable, \Stringab
      */
     public static function fromArray(array $values): self
     {
-        $dateTimes = [];
-        foreach ($values as $value) {
-            $dateTime = \DateTimeImmutable::createFromFormat(EventOccurrenceSpecification::DATE_FORMAT, $value);
-            if ($dateTime === false) {
-                throw new \InvalidArgumentException('Invalid date string ' . $value);
-            }
-            $dateTimes[] = $dateTime;
-        }
-
-        return new self(...$dateTimes);
+        return new self(...array_map(
+            fn (string $value): DateTimeSpecification => DateTimeSpecification::fromString($value),
+            $values
+        ));
     }
 
     public function isEmpty(): bool
@@ -70,7 +55,7 @@ final readonly class RecurrenceDateTimes implements \JsonSerializable, \Stringab
     }
 
     /**
-     * @return \Traversable<int,\DateTimeImmutable>
+     * @return \Traversable<int,DateTimeSpecification>
      */
     public function getIterator(): \Traversable
     {
@@ -78,23 +63,18 @@ final readonly class RecurrenceDateTimes implements \JsonSerializable, \Stringab
     }
 
     /**
-     * @return array<int,\DateTimeImmutable>
+     * @return array<int,DateTimeSpecification>
      */
     public function jsonSerialize(): array
     {
         return $this->items;
     }
 
-    public function toString(): string
+    public function toString(\DateTimeZone $locationTimezone): string
     {
         return 'RDATE;' . implode(',', array_map(
-            fn (\DateTimeImmutable $date): string => 'TZID=' . $date->getTimezone()->getName() . ':' . $date->format('YmdTHis'),
+            fn (DateTimeSpecification $date): string => 'TZID=' . $locationTimezone->getName() . ':' . $date->value,
             $this->items
         ));
-    }
-
-    public function __toString(): string
-    {
-        return $this->toString();
     }
 }

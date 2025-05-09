@@ -9,6 +9,9 @@ Neos:
           'Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification':
             defaultValue: null
             editor: 'Sitegeist.Groundhogday/Inspector/Editors/OccurenceEditor'
+          'DateTimeZone':
+            defaultValue: 'UTC'
+            editor: 'Neos.Neos/Inspector/Editors/TextFieldEditor'
     Ui:
       resources:
         javascript:

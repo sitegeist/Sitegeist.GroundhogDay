@@ -1,0 +1,19 @@
+'Sitegeist.GroundhogDay:Mixin.Location':
+  abstract: true
+  ui:
+    icon: 'map-marker-alt'
+    label: i18n
+    inspector:
+      groups:
+        location:
+          icon: 'map-marker-alt'
+          label: i18n
+  properties:
+    timezone:
+      type: DateTimeZone
+      ui:
+        reloadIfChanged: true
+        showInCreationDialog: true
+        label: i18n
+        inspector:
+          group: location

@@ -14,11 +14,12 @@ use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
 #[Flow\Proxy(false)]
 final readonly class EventOccurrenceSpecificationWasChanged
 {
-    public function __construct(
+    private function __construct(
         public NodeAggregateIdentifier $eventId,
         public NodeAggregateIdentifier $calendarId,
         public EventOccurrenceSpecification $occurrenceSpecification,
         public \DateTimeImmutable $dateOfChange,
+        public \DateTimeZone $locationTimezone,
     ) {
     }
 
@@ -27,7 +28,14 @@ final readonly class EventOccurrenceSpecificationWasChanged
         NodeAggregateIdentifier $calendarId,
         EventOccurrenceSpecification $occurrenceSpecification,
         \DateTimeImmutable $dateOfChange,
+        \DateTimeZone $locationTimezone,
     ): self {
-        return new self($eventId, $calendarId, $occurrenceSpecification, $dateOfChange);
+        return new self(
+            eventId: $eventId,
+            calendarId: $calendarId,
+            occurrenceSpecification: $occurrenceSpecification,
+            dateOfChange: $dateOfChange->setTimezone(new \DateTimeZone('UTC')),
+            locationTimezone: $locationTimezone,
+        );
     }
 }

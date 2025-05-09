@@ -28,7 +28,8 @@ final class EventOccurrenceZookeeper
         $this->eventOccurrenceRepository->initializeOccurrences(
             eventId: $event->eventId,
             calendarId: $event->calendarId,
-            occurrenceSpecification: $event->occurrenceSpecification
+            occurrenceSpecification: $event->occurrenceSpecification,
+            locationTimezone: $event->locationTimezone,
         );
     }
 
@@ -38,7 +39,8 @@ final class EventOccurrenceZookeeper
             eventId: $event->eventId,
             calendarId: $event->calendarId,
             occurrenceSpecification: $event->occurrenceSpecification,
-            referenceDate: $event->dateOfChange
+            referenceDate: $event->dateOfChange,
+            locationTimezone: $event->locationTimezone,
         );
     }
 

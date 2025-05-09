@@ -54,6 +54,8 @@ class EventRelay
             $liveContextProperties['workspaceName'] = 'live';
             $liveContext = $this->contentContextFactory->create($liveContextProperties);
             $liveEvent = $liveContext->getNodeByIdentifier($node->getIdentifier());
+            $calendarId = $this->resolveCalendarId($node);
+            $locationTimezone = $this->resolveLocationTimezone($node);
             if ($liveEvent) {
                 $oldValue = $liveEvent->getProperty('occurrence');
                 if (
@@ -61,17 +63,19 @@ class EventRelay
                     || !$newValue->equals($oldValue)
                 ) {
                     $this->eventsToPublish[] = EventOccurrenceSpecificationWasChanged::create(
-                        $node->getNodeAggregateIdentifier(),
-                        $this->resolveCalendarId($node),
-                        $newValue,
-                        new \DateTimeImmutable(),
+                        eventId: $node->getNodeAggregateIdentifier(),
+                        calendarId: $calendarId,
+                        occurrenceSpecification: $newValue,
+                        dateOfChange: new \DateTimeImmutable(),
+                        locationTimezone: $locationTimezone,
                     );
                 }
             } else {
                 $this->eventsToPublish[] = EventWasCreated::create(
-                    $node->getNodeAggregateIdentifier(),
-                    $this->resolveCalendarId($node),
-                    $newValue,
+                    eventId: $node->getNodeAggregateIdentifier(),
+                    calendarId: $calendarId,
+                    occurrenceSpecification: $newValue,
+                    locationTimezone: $locationTimezone,
                 );
             }
         }
@@ -102,6 +106,24 @@ class EventRelay
                 $calendarCandidate = $calendarCandidate->findParentNode();
             } catch (NodeException) {
                 throw CalendarIsMissing::butWasRequired($event->getNodeAggregateIdentifier());
+            }
+        }
+    }
+
+    /**
+     * @throws LocationIsMissing
+     */
+    private function resolveLocationTimezone(Node $event): \DateTimeZone
+    {
+        $locationCandidate = $event;
+        while ($locationCandidate) {
+            if ($locationCandidate->getNodeType()->isOfType('Sitegeist.GroundhogDay:Mixin.Location')) {
+                return $locationCandidate->getProperty('timezone') ?: new \DateTimeZone('UTC');
+            }
+            try {
+                $locationCandidate = $locationCandidate->findParentNode();
+            } catch (NodeException) {
+                throw LocationIsMissing::butWasRequired($event->getNodeAggregateIdentifier());
             }
         }
     }

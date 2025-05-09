@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    <file original="NodeTypes/Mixin/Location" product-name="Sitegeist.GroundhogDay" source-language="en" datatype="plaintext">
+        <body>
+            <trans-unit id="groups.location" xml:space="preserve" approved="yes">
+                <source>Location</source>
+            </trans-unit>
+            <trans-unit id="properties.timezone" xml:space="preserve" approved="yes">
+                <source>Timezone</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

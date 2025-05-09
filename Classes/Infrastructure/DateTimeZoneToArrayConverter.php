@@ -6,14 +6,13 @@ namespace Sitegeist\GroundhogDay\Infrastructure;
 
 use Neos\Flow\Property\PropertyMappingConfigurationInterface;
 use Neos\Flow\Property\TypeConverter\AbstractTypeConverter;
-use Sitegeist\GroundhogDay\Domain\EventOccurrenceSpecification;
 
-class EventOccurrenceSpecificationToArrayConverter extends AbstractTypeConverter
+class DateTimeZoneToArrayConverter extends AbstractTypeConverter
 {
     /**
      * @var array<int,string>
      */
-    protected $sourceTypes = [EventOccurrenceSpecification::class];
+    protected $sourceTypes = [\DateTimeZone::class];
 
     /**
      * @var string
@@ -27,7 +26,7 @@ class EventOccurrenceSpecificationToArrayConverter extends AbstractTypeConverter
     protected $priority = 10;
 
     /**
-     * @param EventOccurrenceSpecification $source
+     * @param \DateTimeZone $source
      * @param string $targetType,
      * @param array<mixed> $convertedChildProperties
      * @return string
@@ -38,6 +37,6 @@ class EventOccurrenceSpecificationToArrayConverter extends AbstractTypeConverter
         array $convertedChildProperties = [],
         ?PropertyMappingConfigurationInterface $configuration = null
     ) {
-        return \json_encode($source, JSON_THROW_ON_ERROR);
+        return $source->getName();
     }
 }

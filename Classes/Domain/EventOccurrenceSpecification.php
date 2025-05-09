@@ -10,14 +10,17 @@ use Recurr\Transformer\ArrayTransformer;
 use Recurr\Transformer\Constraint\BeforeConstraint;
 
 #[Flow\Proxy(false)]
-final readonly class EventOccurrenceSpecification implements \JsonSerializable, \Stringable
+final readonly class EventOccurrenceSpecification implements \JsonSerializable
 {
+    /**
+     * We use local time relative to the event venue, as specified in https://icalendar.org/iCalendar-RFC-5545/3-3-5-date-time.html Form #1
+     */
     public const DATE_FORMAT = 'Ymd\THisp';
     public const DURATION_FORMAT = 'P%dDT%hH%iM%sS';
 
     public function __construct(
-        public \DateTimeImmutable $startDate,
-        public ?\DateTimeImmutable $endDate,
+        public DateTimeSpecification $startDate,
+        public ?DateTimeSpecification $endDate,
         public ?\DateInterval $duration,
         public ?RecurrenceRule $recurrenceRule,
         public ?RecurrenceDateTimes $recurrenceDateTimes,
@@ -29,8 +32,8 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
     }
 
     public static function create(
-        \DateTimeImmutable $startDate,
-        ?\DateTimeImmutable $endDate = null,
+        DateTimeSpecification $startDate,
+        ?DateTimeSpecification $endDate = null,
         ?\DateInterval $duration = null,
         ?RecurrenceRule $recurrenceRule = null,
         ?RecurrenceDateTimes $recurrenceDatesTimes = null,
@@ -59,22 +62,16 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
 
         foreach ($parts as $part) {
             if (\str_starts_with($part, 'DTSTART:')) {
-                $startDate = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, \mb_substr($part, 8));
-                if ($startDate === false) {
-                    throw new \InvalidArgumentException('Invalid start date string ' . $part);
-                }
+                $startDate = DateTimeSpecification::fromString(\mb_substr($part, 8));
             } elseif (\str_starts_with($part, 'DTEND:')) {
-                $endDate = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, \mb_substr($part, 6));
-                if ($endDate === false) {
-                    throw new \InvalidArgumentException('Invalid end date string ' . $part);
-                }
+                $endDate = DateTimeSpecification::fromString(\mb_substr($part, 6));
             } elseif (\str_starts_with($part, 'DURATION:')) {
                 $duration = new \DateInterval(\mb_substr($part, 9));
             } elseif (\str_starts_with($part, 'RRULE:')) {
                 $recurrenceRule = RecurrenceRule::fromString($part);
-            } elseif (\str_starts_with($part, 'RDATE;')) {
+            } elseif (\str_starts_with($part, 'RDATE:')) {
                 $recurrenceDatesTimes = RecurrenceDateTimes::fromString($part);
-            } elseif (\str_starts_with($part, 'EXDATE;')) {
+            } elseif (\str_starts_with($part, 'EXDATE:')) {
                 $exceptionDateTimes = ExceptionDateTimes::fromString($part);
             }
         }
@@ -102,52 +99,46 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
         if (!array_key_exists('startDate', $values)) {
             throw StartDateIsMissing::butWasRequired(\json_encode($values) ?: '[invalid JSON]');
         }
-        $startDate = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $values['startDate']);
-        if ($startDate === false) {
-            throw new \InvalidArgumentException('Invalid start date string ' . $values['startDate']);
-        }
-        $endDate = array_key_exists('endDate', $values)
-            ? \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $values['endDate'])
-            : null;
-        if ($endDate === false) {
-            throw new \InvalidArgumentException('Invalid end date string ' . $values['endDate']);
-        }
 
         return self::create(
-            startDate: $startDate,
-            endDate: $endDate,
+            startDate: DateTimeSpecification::fromString($values['startDate']),
+            endDate: array_key_exists('endDate', $values)
+                ? DateTimeSpecification::fromString($values['endDate'])
+                : null,
             duration: array_key_exists('duration', $values)
                 ? new \DateInterval($values['duration'])
                 : null,
             recurrenceRule: array_key_exists('recurrenceRule', $values)
                 ? RecurrenceRule::fromString($values['recurrenceRule'])
                 : null,
-            recurrenceDatesTimes: array_key_exists('recurrenceDatesTimes', $values)
-                ? RecurrenceDateTimes::fromArray($values['recurrenceDatesTimes'])
+            recurrenceDatesTimes: array_key_exists('recurrenceDateTimes', $values)
+                ? RecurrenceDateTimes::fromString($values['recurrenceDateTimes'])
                 : null,
             exceptionDateTimes: array_key_exists('exceptionDateTimes', $values)
-                ? ExceptionDateTimes::fromArray($values['exceptionDateTimes'])
+                ? ExceptionDateTimes::fromString($values['exceptionDateTimes'])
                 : null,
         );
     }
 
-    public function resolveEndDate(): ?\DateTimeImmutable
+    public function resolveEndDate(\DateTimeZone $locationTimezone): ?\DateTimeImmutable
     {
         return $this->endDate
-            ?: (
+            ? $this->endDate->toDateTime($locationTimezone)
+            : (
                 $this->duration
-                    ? $this->startDate->add($this->duration)
+                    ? $this->startDate->toDateTime($locationTimezone)->add($this->duration)
                     : null
             );
     }
 
-    public function resolveDuration(): ?\DateInterval
+    public function resolveDuration(\DateTimeZone $locationTimezone): ?\DateInterval
     {
         if ($this->duration) {
             return $this->duration;
         }
         if ($this->endDate) {
-            return $this->startDate->diff($this->endDate);
+            return $this->startDate->toDateTime($locationTimezone)
+                ->diff($this->endDate->toDateTime($locationTimezone));
         }
 
         return null;
@@ -156,32 +147,34 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
     /**
      * @return array<int,EventDates>
      */
-    public function resolveDates(?\DateTimeImmutable $afterDate = null, ?\DateInterval $recurrenceInterval = null): array
+    public function resolveDates(?\DateTimeImmutable $afterDate, ?\DateInterval $recurrenceInterval, \DateTimeZone $locationTimezone): array
     {
         $dates = [];
         if (!$afterDate || $this->startDate >= $afterDate) {
-            $dates[$this->startDate->format(self::DATE_FORMAT)] = new EventDates(
-                $this->startDate,
-                $this->resolveEndDate() ?: $this->startDate,
+            $startDate = $this->startDate->toDateTime($locationTimezone);
+            $dates[$startDate->format(self::DATE_FORMAT)] = new EventDates(
+                $startDate,
+                $this->resolveEndDate($locationTimezone) ?: $startDate,
             );
         }
 
         if ($this->recurrenceRule !== null) {
-            $dates = array_merge($dates, $this->resolveRecurrenceDates($afterDate, $recurrenceInterval));
+            $dates = array_merge($dates, $this->resolveRecurrenceDates($afterDate, $recurrenceInterval, $locationTimezone));
         }
 
         if ($this->recurrenceDateTimes !== null) {
-            foreach ($this->recurrenceDateTimes as $recurrenceDateTime) {
+            foreach ($this->recurrenceDateTimes as $recurrenceDateTimeSpecification) {
+                $recurrenceDateTime = $recurrenceDateTimeSpecification->toDateTime($locationTimezone);
                 if ($afterDate && $recurrenceDateTime < $afterDate) {
                     continue;
                 }
-                $dates[$recurrenceDateTime->format(self::DATE_FORMAT)] = $this->completeDate($recurrenceDateTime);
+                $dates[$recurrenceDateTime->format(self::DATE_FORMAT)] = $this->completeDate($recurrenceDateTime, $locationTimezone);
             }
         }
 
         if ($this->exceptionDateTimes !== null) {
             foreach ($this->exceptionDateTimes as $exceptionDateTime) {
-                $occurrenceId = $exceptionDateTime->format(self::DATE_FORMAT);
+                $occurrenceId = $exceptionDateTime->toDateTime($locationTimezone)->format(self::DATE_FORMAT);
                 if (array_key_exists($occurrenceId, $dates)) {
                     unset($dates[$occurrenceId]);
                 }
@@ -196,13 +189,13 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
     /**
      * @return array<string,EventDates>
      */
-    public function resolveRecurrenceDates(?\DateTimeImmutable $afterDate, ?\DateInterval $recurrenceInterval = null): array
+    public function resolveRecurrenceDates(?\DateTimeImmutable $afterDate, ?\DateInterval $recurrenceInterval, \DateTimeZone $locationTimezone): array
     {
         $dates = [];
         if ($this->recurrenceRule !== null) {
-            $referenceDate = $afterDate ?: $this->startDate;
+            $referenceDate = $afterDate ?: $this->startDate->toDateTime($locationTimezone);
             $renderer = new ArrayTransformer();
-            $rule = new Rule($this->recurrenceRule->value, $this->startDate, $this->resolveEndDate());
+            $rule = new Rule($this->recurrenceRule->value, $this->startDate->toDateTime($locationTimezone), $this->resolveEndDate($locationTimezone));
             foreach (
                 $renderer->transform(
                     $rule,
@@ -223,9 +216,9 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
         return $dates;
     }
 
-    public function completeDate(\DateTimeImmutable $startDate): EventDates
+    public function completeDate(\DateTimeImmutable $startDate, \DateTimeZone $locationTimezone): EventDates
     {
-        $duration = $this->resolveDuration();
+        $duration = $this->resolveDuration($locationTimezone);
         $endDate = $duration ? $startDate->add($duration) : $startDate;
 
         return new EventDates(
@@ -236,7 +229,8 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
 
     public function equals(self $other): bool
     {
-        return $this->toString() === $other->toString();
+        $referenceTimeZone = new \DateTimeZone('UTC');
+        return $this->toString($referenceTimeZone) === $other->toString($referenceTimeZone);
     }
 
     /**
@@ -245,27 +239,20 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable, 
     public function jsonSerialize(): array
     {
         $values = get_object_vars($this);
-        $values['startDate'] = $values['startDate']->format(self::DATE_FORMAT);
-        $values['endDate'] = $values['endDate']?->format(self::DATE_FORMAT);
         $values['duration'] = $values['duration']?->format(self::DURATION_FORMAT);
 
         return $values;
     }
 
-    public function toString(): string
+    public function toString(\DateTimeZone $locationTimezone): string
     {
         return implode("\n", array_filter([
-            'DTSTART:' . $this->startDate->format(self::DATE_FORMAT),
-            $this->endDate ? 'DTEND:' . $this->endDate->format(self::DATE_FORMAT) : null,
+            'DTSTART;TZID=' . $locationTimezone->getName() . ':' . $this->startDate->value,
+            $this->endDate ? ('DTEND;TZID=' . $locationTimezone->getName() . ':' . $this->endDate->value) : null,
             $this->duration ? 'DURATION:' . $this->duration->format(self::DURATION_FORMAT) : null,
             $this->recurrenceRule?->toString(),
-            $this->recurrenceDateTimes?->toString(),
-            $this->exceptionDateTimes?->toString(),
+            $this->recurrenceDateTimes?->toString($locationTimezone),
+            $this->exceptionDateTimes?->toString($locationTimezone),
         ]));
-    }
-
-    public function __toString(): string
-    {
-        return $this->toString();
     }
 }

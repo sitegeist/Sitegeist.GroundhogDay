@@ -8,9 +8,9 @@ export const updateRRuleEndOptions = (rrule: RRule, endType: RRuleEndType): RRul
         case 'never':
             return new RRule({ ...baseOptions, count: undefined, until: undefined })
         case 'until':
-            return new RRule({ ...baseOptions, count: undefined })
+            return new RRule({ ...baseOptions, count: undefined, until: new Date() })
         case 'count':
-            return new RRule({ ...baseOptions, until: undefined })
+            return new RRule({ ...baseOptions, until: undefined, count: 1 })
         default:
             return rrule
     }

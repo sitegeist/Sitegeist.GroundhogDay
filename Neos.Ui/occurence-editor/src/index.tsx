@@ -4,9 +4,9 @@ import { IGlobalRegistry, NeosContext } from '@sitegeist/groundhogday-neos-bridg
 import { OcurrenceEditor } from './editors/OccurenceEditor'
 import { OccurenceProvider } from './context/OccurenceContext'
 import { OccurenceCommitObject, OccurenceState } from './types'
-import { normalizeDates } from './utils/normalizeRecurrenceDates'
-import { format } from 'date-fns'
-import { COMMIT_DATE_FORMAT } from './utils/constants'
+import { serializeExdatesToString, serializeRdatesToString } from './utils/iCalDateHelpers'
+import { formatICalDate, formatICalDuration } from './utils/iCalDateHelpers'
+import _ from 'lodash'
 
 export function registerOccurenceEditor(globalRegistry: IGlobalRegistry): void {
     const inspectorRegistry = globalRegistry.get('inspector')
@@ -29,21 +29,24 @@ export function registerOccurenceEditor(globalRegistry: IGlobalRegistry): void {
 
             const handleCommit = (occurence: OccurenceState) => {
                 const occurenceCommit: OccurenceCommitObject = {
-                    startDate: format(occurence.startDate ?? new Date, COMMIT_DATE_FORMAT),
-                    endDate: occurence.endDate && format(occurence.endDate, COMMIT_DATE_FORMAT),
-                    recurrenceRule: occurence.recurrenceRule?.toString() ?? undefined,
-                    recurrenceDates: normalizeDates(occurence.recurrenceDates)
+                    startDate: formatICalDate(occurence.startDate ?? new Date),
+                    endDate: occurence.endDate ? formatICalDate(occurence.endDate) : null,
+                    recurrenceRule: occurence.recurrenceRule?.toString() ?? null,
+                    recurrenceDateTimes: serializeRdatesToString(occurence.recurrenceDateTimes),
+                    exceptionDateTimes: serializeExdatesToString(occurence.exceptionDateTimes),
+                    duration: (occurence.durationCount && occurence.durationUnit) ? formatICalDuration(occurence.durationCount, occurence.durationUnit) : null
                 }
-
-                console.log(occurenceCommit);
-
-                commit(occurenceCommit);
+                
+                if (!_.isEqual(value, occurenceCommit)) {
+                    console.log(value, occurenceCommit);
+                    commit(occurenceCommit);
+                }
             }
 
             return (
                 <NeosContext.Provider value={{globalRegistry}}>
                     <OccurenceProvider value={value} onCommit={handleCommit}>
-                        <OcurrenceEditor {...rest} value={value} />
+                        <OcurrenceEditor {...rest} />
                     </OccurenceProvider>
                 </NeosContext.Provider>
             )

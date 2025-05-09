@@ -224,17 +224,41 @@
                 <source>Recurrence Rule</source>
                 <target state="translated">Wiederholungsregel</target>
             </trans-unit>
-            <trans-unit id="occurence.manual" xml:space="preserve" approved="yes">
-                <source>Manual</source>
-                <target state="translated">Manuell</target>
-            </trans-unit>
             <trans-unit id="inspector.addDate" xml:space="preserve" approved="yes">
                 <source>Add a date</source>
                 <target state="translated">Datum hinzufügen</target>
             </trans-unit>
-            <trans-unit id="inspector.eventStartAndEnd" xml:space="preserve" approved="yes">
-                <source>Start and end of Event</source>
-                <target state="translated">Start und Ende des Events</target>
+            <trans-unit id="inspector.eventStart" xml:space="preserve" approved="yes">
+                <source>Event starts on Date:</source>
+                <target state="translated">Event startet am Datum:</target>
+            </trans-unit>
+            <trans-unit id="eventEndType.endDate" xml:space="preserve" approved="yes">
+                <source>Event ends on Date:</source>
+                <target state="translated">Event endet am Datum:</target>
+            </trans-unit>
+            <trans-unit id="eventEndType.duration" xml:space="preserve" approved="yes">
+                <source>Event ends after duration:</source>
+                <target state="translated">Event endet nach Dauer:</target>
+            </trans-unit>
+            <trans-unit id="unit.hour" xml:space="preserve" approved="yes">
+                <source>Hour(s)</source>
+                <target state="translated">Stunde(n)</target>
+            </trans-unit>
+            <trans-unit id="unit.minute" xml:space="preserve" approved="yes">
+                <source>Minute(s)</source>
+                <target state="translated">Minute(n)</target>
+            </trans-unit>
+            <trans-unit id="unit.day" xml:space="preserve" approved="yes">
+                <source>Day(s)</source>
+                <target state="translated">Tag(e)</target>
+            </trans-unit>
+            <trans-unit id="inspector.exceptions" xml:space="preserve" approved="yes">
+                <source>Exceptions</source>
+                <target state="translated">Ausnahmen</target>
+            </trans-unit>
+            <trans-unit id="inspector.manual" xml:space="preserve" approved="yes">
+                <source>Manual Recurrences</source>
+                <target state="translated">Manuelle Wiederholungen</target>
             </trans-unit>
         </body>
     </file>

@@ -2,15 +2,25 @@ import { Frequency } from "rrule"
 
 export type I18nFn = (key: string) => string;
 
-export const COMMIT_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'"
+export const ICAL_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'"
 
 const BASE = 'Sitegeist.GroundhogDay:NodeTypes.Mixin.Event';
 
 export const getOccurenceMethodOptions = (i18n: I18nFn) => [
     { label: i18n(`${BASE}:end.never`), value: 'never' },
-    { label: i18n(`${BASE}:occurence.rrule`), value: 'rrule' },
-    { label: i18n(`${BASE}:occurence.manual`), value: 'manual' }
+    { label: i18n(`${BASE}:occurence.rrule`), value: 'rrule' }
 ]
+
+export const getEventEndTypeOptions = (i18n: I18nFn) => [
+    { label: i18n(`${BASE}:eventEndType.endDate`), value: 'endDate' },
+    { label: i18n(`${BASE}:eventEndType.duration`), value: 'duration' }
+];
+
+export const getDurationUnitOptions = (i18n: I18nFn) => [
+    { value: 'minute', label: i18n(`${BASE}:unit.minute`) },
+    { value: 'hour', label: i18n(`${BASE}:unit.hour`) },
+    { value: 'day', label: i18n(`${BASE}:unit.day`) }
+];
 
 export const getEndTypeOptions = (i18n: I18nFn) => [
     { label: i18n(`${BASE}:end.never`), value: 'never', icon: 'infinity' },

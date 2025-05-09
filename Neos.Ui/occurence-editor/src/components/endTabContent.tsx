@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DateInput, SelectBox } from '@neos-project/react-ui-components'
 import { RRule } from 'rrule'
 import { RRuleEndType, RRuleEditorComponentProps } from '../types'
@@ -12,6 +12,11 @@ import { useI18n } from '@sitegeist/groundhogday-neos-bridge'
 export const EndTabContent: React.FC<RRuleEditorComponentProps> = ({ rrule, onChange }) => {
     const [endType, setEndType] = useState<RRuleEndType>(getInitialEndType(rrule))
     const i18n = useI18n()
+
+    useEffect(() => {
+        const initialMethod = getInitialEndType(rrule);
+        setEndType(initialMethod);
+    }, [rrule]);
 
     const handleUntilChange = (newDate: Date) => {
         const updatedRRule = new RRule({

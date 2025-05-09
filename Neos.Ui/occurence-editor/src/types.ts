@@ -3,15 +3,20 @@ import { RRule } from "rrule"
 export type OccurenceState = {
     startDate?: Date,
     endDate?: Date,
+    durationCount?: number,
+    durationUnit?: DurationUnit,
     recurrenceRule?: RRule,
-    recurrenceDates?: (Date | null)[],
+    recurrenceDateTimes?: (Date | null)[],
+    exceptionDateTimes?: (Date | null)[]
 }
 
 export type OccurenceCommitObject = {
     startDate: string,
-    endDate?: string,
-    recurrenceRule?: string,
-    recurrenceDates?: string[],
+    endDate?: string | null,
+    duration?: string | null,
+    recurrenceRule?: string | null,
+    recurrenceDateTimes?: string | null,
+    exceptionDateTimes?: string | null
 }
 
 export type Props<T> = {
@@ -19,7 +24,11 @@ export type Props<T> = {
     commit: (value?: T | null) => void
 }
 
-export type OccurenceMethod = 'never' | 'rrule' | 'manual';
+export type OccurenceMethod = 'never' | 'rrule';
+
+export type EventEndType = 'endDate' | 'duration';
+
+export type DurationUnit = 'minute' | 'hour' | 'day';
 
 export type RRuleTab = 'repeat' | 'end';
 

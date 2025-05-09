@@ -175,14 +175,32 @@
             <trans-unit id="occurence.rrule" xml:space="preserve" approved="yes">
                 <source>Recurrence Rule</source>
             </trans-unit>
-            <trans-unit id="occurence.manual" xml:space="preserve" approved="yes">
-                <source>Manual</source>
-            </trans-unit>
             <trans-unit id="inspector.addDate" xml:space="preserve" approved="yes">
                 <source>Add a date</source>
             </trans-unit>
-            <trans-unit id="inspector.eventStartAndEnd" xml:space="preserve" approved="yes">
-                <source>Start and end of Event</source>
+            <trans-unit id="inspector.eventStart" xml:space="preserve" approved="yes">
+                <source>Event starts on Date:</source>
+            </trans-unit>
+            <trans-unit id="eventEndType.endDate" xml:space="preserve" approved="yes">
+                <source>Event ends on Date:</source>
+            </trans-unit>
+            <trans-unit id="eventEndType.duration" xml:space="preserve" approved="yes">
+                <source>Event ends after duration:</source>
+            </trans-unit>
+            <trans-unit id="unit.hour" xml:space="preserve" approved="yes">
+                <source>Hour(s)</source>
+            </trans-unit>
+            <trans-unit id="unit.minute" xml:space="preserve" approved="yes">
+                <source>Minute(s)</source>
+            </trans-unit>
+            <trans-unit id="unit.day" xml:space="preserve" approved="yes">
+                <source>Day(s)</source>
+            </trans-unit>
+            <trans-unit id="inspector.exceptions" xml:space="preserve" approved="yes">
+                <source>Exceptions</source>
+            </trans-unit>
+            <trans-unit id="inspector.manual" xml:space="preserve" approved="yes">
+                <source>Manual Recurrences</source>
             </trans-unit>
         </body>
     </file>

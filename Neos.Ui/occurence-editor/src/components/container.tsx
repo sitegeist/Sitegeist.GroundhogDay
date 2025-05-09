@@ -34,3 +34,9 @@ export const Container = styled.div`
     flex-direction: column;
     gap: 8px;
 `
+
+export const RowContainer = styled.div`
+    width: 100%;
+    display: flex;
+    gap: 8px;
+`

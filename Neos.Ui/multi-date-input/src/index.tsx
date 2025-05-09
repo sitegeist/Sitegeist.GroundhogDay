@@ -38,7 +38,7 @@ export const MultiDateInput = ({ value, onChange }: MultiDateInputProps) => {
     };
 
     const handleAddNew = () => {
-        const updated = [...dates, null];
+        const updated = [...dates, new Date()];
         setDates(updated);
         setAddingNewIndex(dates.length);
         onChange?.(updated);

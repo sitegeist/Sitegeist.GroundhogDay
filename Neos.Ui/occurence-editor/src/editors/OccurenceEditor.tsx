@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { OccurenceMethod } from '../types'
 import { RRuleEditor } from './RRuleEditor'
 import { useOccurence } from '../context/OccurenceContext'
@@ -12,10 +12,15 @@ import { Frequency, RRule } from 'rrule'
 import { MultiDateInput } from '@sitegeist/groundhogday-multi-date-input'
 
 export const OcurrenceEditor = () => {
-    const { occurence, setRRule, setRecurrencDates, resetRecurrenceDatesAndRule } = useOccurence();
+    const { occurence, setRRule, resetRRule, setRecurrencDates, setExceptionDates } = useOccurence();
     const i18n = useI18n();
 
     const [occurenceMethod, setOccurenceMethod] = useState<OccurenceMethod>(getInitialOccurenceMethod(occurence));
+
+    useEffect(() => {
+        const initialMethod = getInitialOccurenceMethod(occurence);
+        setOccurenceMethod(initialMethod);
+    }, [occurence.recurrenceRule, occurence.recurrenceDateTimes, occurence.exceptionDateTimes]);
 
     const handleOccurenceChange = (value: OccurenceMethod) => {
         if (value === occurenceMethod) {
@@ -33,19 +38,11 @@ export const OcurrenceEditor = () => {
             }))
         }
 
-        if (value === 'manual') {
-            setRecurrencDates([])
-        }
-
         if (value === 'never') {
-            resetRecurrenceDatesAndRule();
+            resetRRule()
         }
 
         setOccurenceMethod(value);
-    }
-
-    const handleOccurenceDatesChange = (dates: (Date | null)[]) => {
-        setRecurrencDates(dates);
     }
 
     return (
@@ -60,12 +57,16 @@ export const OcurrenceEditor = () => {
             {(occurenceMethod == 'rrule' && occurence.recurrenceRule) &&
                 <RRuleEditor />
             }
-            {occurenceMethod == 'manual' &&
-                <MultiDateInput
-                    value={occurence.recurrenceDates}
-                    onChange={handleOccurenceDatesChange}
-                />
-            }
+            <Label>{i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.exceptions')}</Label>
+            <MultiDateInput
+                value={occurence.exceptionDateTimes}
+                onChange={setExceptionDates}
+            />
+            <Label>{i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.manual')}</Label>
+            <MultiDateInput
+                value={occurence.recurrenceDateTimes}
+                onChange={setRecurrencDates}
+            />
         </EditorContainer>
     )
 }

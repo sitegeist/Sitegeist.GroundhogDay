@@ -1,24 +1,42 @@
-import React from 'react'
-import { DateInput, Label } from '@neos-project/react-ui-components'
-import { Container } from '../components/container'
-import { useI18n } from '@sitegeist/groundhogday-neos-bridge'
-import { useOccurence } from '../context/OccurenceContext'
+import React, { useEffect, useState } from 'react';
+import { DateInput, Label, SelectBox } from '@neos-project/react-ui-components';
+import { Container } from '../components/container';
+import { useI18n } from '@sitegeist/groundhogday-neos-bridge';
+import { useOccurence } from '../context/OccurenceContext';
+import { EventEndType } from '../types';
+import { getInitialEventEndType } from '../utils/getInitialEventEndType';
+import { getEventEndTypeOptions } from '../utils/constants';
+import { DurationEditor } from './DurationEditor';
 
 export const EventDatesEditor = () => {
-    const { occurence, setStartDate, setEndDate } = useOccurence();
-    const i18n = useI18n()
+    const { occurence, setStartDate, setEndDate, setDurationValues, resetDurationValues } = useOccurence();
+    const i18n = useI18n();
 
-    const handleStartDateChange = (date: Date) => {
-        setStartDate(date)
-    }
+    const [eventEndType, setEventEndType] = useState<EventEndType>(getInitialEventEndType(occurence));
 
-    const handleEndDateChange = (date: Date) => {
-        setEndDate(date)
+    useEffect(() => {
+        const initialMethod = getInitialEventEndType(occurence);
+        setEventEndType(initialMethod);
+    }, [occurence.endDate, occurence.durationCount, occurence.durationUnit]);
+
+    const handleEventEndTypeChange = (value: EventEndType) => {
+        if (eventEndType === value) return;
+
+        if (value == 'duration') {
+            setEndDate(undefined);
+            setDurationValues(1, 'day');
+        }
+
+        if (value == 'endDate') {
+            resetDurationValues();
+        }
+
+        setEventEndType(value);
     }
 
     return (
         <Container>
-            <Label>{i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.eventStartAndEnd')}</Label>
+            <Label>{i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.eventStart')}</Label>
             <DateInput
                 theme={{
                     'selectTodayBtn': 'select-tdy-btn'
@@ -26,19 +44,28 @@ export const EventDatesEditor = () => {
                 is24Hour
                 value={occurence.startDate ?? undefined}
                 labelFormat="DD. MMM YYYY, HH:mm"
-                onChange={handleStartDateChange}
+                onChange={setStartDate}
                 placeholder={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.selectStartDate')}
             />
-            <DateInput
-                theme={{
-                    'selectTodayBtn': 'select-tdy-btn'
-                }}
-                is24Hour
-                value={occurence.endDate ?? undefined}
-                labelFormat="DD. MMM YYYY, HH:mm"
-                onChange={handleEndDateChange}
-                placeholder={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.selectEndDate')}
+
+            <SelectBox
+                options={getEventEndTypeOptions(i18n)}
+                value={eventEndType}
+                onValueChange={handleEventEndTypeChange}
             />
+
+            {eventEndType === 'endDate' ? (
+                <DateInput
+                    theme={{ 'selectTodayBtn': 'select-tdy-btn' }}
+                    is24Hour
+                    value={occurence.endDate ?? undefined}
+                    labelFormat="DD. MMM YYYY, HH:mm"
+                    onChange={setEndDate}
+                    placeholder={i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.selectEndDate')}
+                />
+            ) : (
+                <DurationEditor />
+            )}
         </Container>
-    )
-}
+    );
+};

@@ -53,6 +53,7 @@ export const OccurenceProvider = (
     const setDurationValues = (count?: number, unit?: DurationUnit) => {
         const next = { 
             ...occurence,
+            endDate: undefined,
             durationCount: count,
             durationUnit: unit
         };

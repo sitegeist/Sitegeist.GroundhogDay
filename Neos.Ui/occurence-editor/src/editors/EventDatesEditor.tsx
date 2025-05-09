@@ -23,7 +23,6 @@ export const EventDatesEditor = () => {
         if (eventEndType === value) return;
 
         if (value == 'duration') {
-            setEndDate(undefined);
             setDurationValues(1, 'day');
         }
 

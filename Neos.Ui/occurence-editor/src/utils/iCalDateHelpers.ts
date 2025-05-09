@@ -46,33 +46,28 @@ export const serializeExdatesToString = (
     dates?: (Date | null)[]
 ): string | undefined => {
     if (!dates || dates.length === 0) return undefined;
-  
+
     const validDates = dates.filter((date): date is Date => date instanceof Date);
     if (validDates.length === 0) return undefined;
-  
-    const parts = validDates.map((date) => {
-      const formatted = formatICalDate(date);
-      return `TZID=UTC:${formatted}`;
-    });
-  
-    return `EXDATE;${parts.join(',')}`;
+
+    const parts = validDates.map((date) => formatICalDate(date));
+
+    return `EXDATE:${parts.join(',')}`;
 };
 
 export const deserializeExdatesFromString = (
     exdateString?: string
 ): (Date | null)[] => {
-    if (!exdateString?.startsWith('EXDATE;')) return [];
-  
+    if (!exdateString?.startsWith('EXDATE:')) return [];
+
     const raw = exdateString.slice(7);
     const parts = raw.split(',');
-  
-    const dates = parts.map((part) => {
-      const [tzid, dateStr] = part.split(':');
-      if (!dateStr) return null;
-  
-      return parseICalDate(dateStr);
+
+    const dates = parts.map((dateStr) => {
+        if (!dateStr) return null;
+        return parseICalDate(dateStr);
     });
-  
+
     return dates.length > 0 ? dates : [];
 };
 
@@ -84,26 +79,21 @@ export const serializeRdatesToString = (
     const validDates = dates.filter((date): date is Date => date instanceof Date);
     if (validDates.length === 0) return undefined;
 
-    const parts = validDates.map((date) => {
-        const formatted = formatICalDate(date);
-        return `TZID=UTC:${formatted}`;
-    });
+    const parts = validDates.map((date) => formatICalDate(date));
 
-    return `RDATE;${parts.join(',')}`;
+    return `RDATE:${parts.join(',')}`;
 };
 
 export const deserializeRdatesFromString = (
     rdateString?: string
 ): (Date | null)[] => {
-    if (!rdateString?.startsWith('RDATE;')) return [];
+    if (!rdateString?.startsWith('RDATE:')) return [];
 
     const raw = rdateString.slice(6);
     const parts = raw.split(',');
 
-    const dates = parts.map((part) => {
-        const [tzid, dateStr] = part.split(':');
+    const dates = parts.map((dateStr) => {
         if (!dateStr) return null;
-
         return parseICalDate(dateStr);
     });
 

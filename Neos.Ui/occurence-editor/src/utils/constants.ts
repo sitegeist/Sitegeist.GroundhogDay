@@ -2,7 +2,7 @@ import { Frequency } from "rrule"
 
 export type I18nFn = (key: string) => string;
 
-export const ICAL_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'"
+export const ICAL_DATE_FORMAT = "yyyyMMdd'T'HHmmss";
 
 const BASE = 'Sitegeist.GroundhogDay:NodeTypes.Mixin.Event';
 

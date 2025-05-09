@@ -25,11 +25,16 @@ export function registerOccurenceEditor(globalRegistry: IGlobalRegistry): void {
 
     editorsRegistry.set('Sitegeist.Groundhogday/Inspector/Editors/OccurenceEditor', {
         component: (props: any) => {
-            const { value, commit, options } = props;
-
+            const { value, commit, options, highlight } = props;
+            
             const handleCommit = (occurence: OccurenceState) => {
+                if (!occurence.startDate) {
+                    commit(value);
+                    return;
+                }
+
                 const occurenceCommit: OccurenceCommitObject = {
-                    startDate: formatICalDate(occurence.startDate ?? new Date),
+                    startDate: formatICalDate(occurence.startDate),
                     endDate: occurence.endDate ? formatICalDate(occurence.endDate) : null,
                     recurrenceRule: occurence.recurrenceRule?.toString() ?? null,
                     recurrenceDateTimes: serializeRdatesToString(occurence.recurrenceDateTimes),
@@ -38,7 +43,6 @@ export function registerOccurenceEditor(globalRegistry: IGlobalRegistry): void {
                 }
                 
                 if (!_.isEqual(value, occurenceCommit)) {
-                    console.log(value, occurenceCommit);
                     commit(occurenceCommit);
                 }
             }
@@ -46,7 +50,7 @@ export function registerOccurenceEditor(globalRegistry: IGlobalRegistry): void {
             return (
                 <NeosContext.Provider value={{globalRegistry}}>
                     <OccurenceProvider value={value} onCommit={handleCommit}>
-                        <OcurrenceEditor options={options} />
+                        <OcurrenceEditor options={options} highlight={highlight} />
                     </OccurenceProvider>
                 </NeosContext.Provider>
             )

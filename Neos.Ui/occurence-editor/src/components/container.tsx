@@ -1,7 +1,9 @@
 import styled from 'styled-components'
 
-export const EditorContainer = styled.div<{ disabled?: boolean }>`
+export const EditorContainer = styled.div<{ disabled?: boolean, highlight?: boolean }>`
     width: 100%;
+    max-width: 550px;
+    justify-self: center;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -20,6 +22,7 @@ export const EditorContainer = styled.div<{ disabled?: boolean }>`
         margin-top: 8px;
     }
 
+    .hide-date-reset-button,
     .select-tdy-btn {
         display: none;
     }
@@ -32,7 +35,16 @@ export const EditorContainer = styled.div<{ disabled?: boolean }>`
             > * {
                 pointer-events: none;
             }
-        `}
+        `
+    }
+
+    ${({ highlight }) =>
+        highlight &&
+        `
+            box-shadow: 0 0 0 2px #ff8700;
+            border-radius: 2px;
+        `
+    }
 `;
 
 export const Container = styled.div`

@@ -7,7 +7,7 @@ export function convertToOccurenceState(value: OccurenceCommitObject): Occurence
     const { count, unit } = parseICalDuration(value?.duration);
 
     return {
-        startDate: value?.startDate ? parseICalDate(value.startDate) : undefined,
+        startDate: value?.startDate ? parseICalDate(value.startDate) : new Date,
         endDate: value?.endDate ? parseICalDate(value.endDate) : undefined,
         durationCount: count,
         durationUnit: unit,

@@ -38,7 +38,8 @@ export const EventDatesEditor = () => {
             <Label>{i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.eventStart')}</Label>
             <DateInput
                 theme={{
-                    'selectTodayBtn': 'select-tdy-btn'
+                    'selectTodayBtn': 'select-tdy-btn',
+                    'closeCalendarIconBtn': 'hide-date-reset-button'
                 }}
                 is24Hour
                 value={occurence.startDate ?? undefined}

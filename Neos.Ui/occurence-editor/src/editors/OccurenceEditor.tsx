@@ -13,18 +13,14 @@ import { MultiDateInput } from '@sitegeist/groundhogday-multi-date-input'
 
 interface OccurenceEditorProps {
     options: OccurenceEditorOptions
+    highlight: boolean
 }
 
-export const OcurrenceEditor = ({options}: OccurenceEditorProps) => {
+export const OcurrenceEditor = ({options, highlight}: OccurenceEditorProps) => {
     const { occurence, setRRule, resetRRule, setRecurrencDates, setExceptionDates } = useOccurence();
     const i18n = useI18n();
 
     const [occurenceMethod, setOccurenceMethod] = useState<OccurenceMethod>(getInitialOccurenceMethod(occurence));
-    const [readonly, setReadonly] = useState<boolean>(options.disabled)
-
-    useEffect(() => {
-        setReadonly(options.disabled);
-    }, [options.disabled]);
 
     useEffect(() => {
         const initialMethod = getInitialOccurenceMethod(occurence);
@@ -55,7 +51,7 @@ export const OcurrenceEditor = ({options}: OccurenceEditorProps) => {
     }
 
     return (
-        <EditorContainer disabled={readonly}>
+        <EditorContainer disabled={options.disabled} highlight={highlight}>
             <EventDatesEditor />
             <Label>{i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.repeat')}</Label>
             <SelectBox

@@ -10,35 +10,36 @@ export const formatICalDate = (date: Date): string =>
 
 export const parseICalDuration = (
     duration?: string | null
-  ): { count?: number; unit?: DurationUnit } => {
+): { count?: number; unit?: DurationUnit } => {
     if (!duration) return { count: undefined, unit: undefined };
-  
+
     const match = duration.match(
-      /^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/
+    /^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/
     );
-  
+
     if (!match) return { count: undefined, unit: undefined };
-  
+
     const [ , days, hours, minutes ] = match;
-  
+
     if (days && parseInt(days, 10) > 0) {
-      return { count: parseInt(days, 10), unit: 'day' };
+    return { count: parseInt(days, 10), unit: 'day' };
     }
     if (hours && parseInt(hours, 10) > 0) {
-      return { count: parseInt(hours, 10), unit: 'hour' };
+    return { count: parseInt(hours, 10), unit: 'hour' };
     }
     if (minutes && parseInt(minutes, 10) > 0) {
-      return { count: parseInt(minutes, 10), unit: 'minute' };
+    return { count: parseInt(minutes, 10), unit: 'minute' };
     }
-  
+
     return { count: undefined, unit: undefined };
 };
   
 export const formatICalDuration = (value: number, unit: DurationUnit): string => {
-    if (unit === 'minute') return `PT${value}M`;
-    if (unit === 'hour') return `PT${value}H`;
-    if (unit === 'day') return `P${value}D`;
-    return '';
+    const days = unit === 'day' ? value : 0;
+    const hours = unit === 'hour' ? value : 0;
+    const minutes = unit === 'minute' ? value : 0;
+
+    return `P${days}DT${hours}H${minutes}M0S`;
 };
 
 export const serializeExdatesToString = (

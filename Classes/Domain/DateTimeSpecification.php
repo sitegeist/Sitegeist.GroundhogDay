@@ -8,6 +8,8 @@ use Neos\Flow\Annotations as Flow;
 
 /**
  * A date time specification, relative to the event's venue's local time zone.
+ *
+ * @see https://icalendar.org/iCalendar-RFC-5545/3-3-5-date-time.html
  */
 #[Flow\Proxy(false)]
 final readonly class DateTimeSpecification implements \JsonSerializable, \Stringable
@@ -36,6 +38,11 @@ final readonly class DateTimeSpecification implements \JsonSerializable, \String
         return new self($value);
     }
 
+    public static function fromDateTimeIgnoringTimeZone(\DateTimeImmutable $dateTime): self
+    {
+        return new self($dateTime->format(self::DATE_FORMAT));
+    }
+
     public function equals(self $other): bool
     {
         return $this->value === $other->value;
@@ -52,9 +59,16 @@ final readonly class DateTimeSpecification implements \JsonSerializable, \String
     public function toDateTime(\DateTimeZone $dateTimeZone): \DateTimeImmutable
     {
         $result = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $this->value, $dateTimeZone);
-        assert($result instanceof \DateTimeImmutable); // wouldn't have the constructor otherwise
+        assert($result instanceof \DateTimeImmutable); // wouldn't have passed the constructor otherwise
 
         return $result;
+    }
+
+    public function format(string $format): string
+    {
+        // The time zone is only used internally for formatting
+        return $this->toDateTime(new \DateTimeZone('UTC'))
+            ->format($format);
     }
 
     public function jsonSerialize(): string

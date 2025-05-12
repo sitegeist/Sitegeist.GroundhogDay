@@ -13,9 +13,17 @@ use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\Doctrine\ConnectionFactory;
 use Sitegeist\GroundhogDay\Infrastructure\CalendarIsMissing;
+use Sitegeist\GroundhogDay\Infrastructure\LocationIsMissing;
 
 /**
- * @phpstan-type DatabaseRow array{calendar_id: string, event_id: string, start_date: string, end_date: string}
+ * @phpstan-type DatabaseRow array{
+ *     calendar_id: string,
+ *     event_id: string,
+ *     start_date: string,
+ *     end_date: string,
+ *     start_date_utc: string,
+ *     end_date_utc: string
+ * }
  */
 #[Flow\Scope('singleton')]
 final class EventOccurrenceRepository
@@ -37,11 +45,37 @@ final class EventOccurrenceRepository
     /**
      * @return iterable<int,EventOccurrence>
      */
-    public function findEventOccurrencesWithinPeriod(
+    public function findEventAbsoluteOccurrencesWithinPeriod(
         NodeAggregateIdentifier $calendarId,
-        \DateTimeImmutable $startDate,
-        \DateTimeImmutable $endDate,
+        DateTimeSpecification $startDate,
+        DateTimeSpecification $endDate,
         \DateTimeZone $timeZone,
+    ): iterable {
+        $utcStartDate = $startDate->toDateTime($timeZone)->setTimezone(new \DateTimeZone('UTC'));
+        $utcEndDate = $endDate->toDateTime($timeZone)->setTimezone(new \DateTimeZone('UTC'));
+        /** @var array<int,DatabaseRow> $rows */
+        $rows = $this->databaseConnection->executeQuery(
+            'SELECT * FROM ' . self::TABLE_NAME
+             . ' WHERE calendar_id = :calendarId AND start_date_utc <= :endDate AND end_date_utc >= :startDate',
+            [
+                'calendarId' => (string)$calendarId,
+                'startDate' => $utcStartDate->format(self::DATE_FORMAT),
+                'endDate' => $utcEndDate->format(self::DATE_FORMAT),
+            ]
+        )->fetchAllAssociative();
+
+        foreach ($rows as $row) {
+            yield $this->mapDatabaseRowToEventAbsoluteOccurrence($row, $timeZone);
+        }
+    }
+
+    /**
+     * @return iterable<int,EventOccurrence>
+     */
+    public function findEventLocalOccurrencesWithinPeriod(
+        NodeAggregateIdentifier $calendarId,
+        DateTimeSpecification $startDate,
+        DateTimeSpecification $endDate,
     ): iterable {
         /** @var array<int,DatabaseRow> $rows */
         $rows = $this->databaseConnection->executeQuery(
@@ -55,14 +89,14 @@ final class EventOccurrenceRepository
         )->fetchAllAssociative();
 
         foreach ($rows as $row) {
-            yield $this->mapDatabaseRowToEventOccurrence($row, $timeZone);
+            yield $this->mapDatabaseRowToEventLocalOccurrence($row);
         }
     }
 
     /**
      * @return iterable<int,EventOccurrence>
      */
-    public function findEventOccurrencesByEventId(
+    public function findEventAbsoluteOccurrencesByEventId(
         NodeAggregateIdentifier $eventId,
         \DateTimeZone $timeZone,
     ): iterable {
@@ -76,17 +110,60 @@ final class EventOccurrenceRepository
         )->fetchAllAssociative();
 
         foreach ($rows as $row) {
-            yield $this->mapDatabaseRowToEventOccurrence($row, $timeZone);
+            yield $this->mapDatabaseRowToEventAbsoluteOccurrence($row, $timeZone);
         }
     }
 
     /**
      * @return iterable<int,EventOccurrence>
      */
-    public function findFutureEventOccurrencesByEventId(
+    public function findEventLocalOccurrencesByEventId(
         NodeAggregateIdentifier $eventId,
-        \DateTimeImmutable $referenceDate,
+    ): iterable {
+        /** @var array<int,DatabaseRow> $rows */
+        $rows = $this->databaseConnection->executeQuery(
+            'SELECT * FROM ' . self::TABLE_NAME
+            . ' WHERE event_id = :eventId',
+            [
+                'eventId' => (string)$eventId,
+            ]
+        )->fetchAllAssociative();
+
+        foreach ($rows as $row) {
+            yield $this->mapDatabaseRowToEventLocalOccurrence($row);
+        }
+    }
+
+    /**
+     * @return iterable<int,EventOccurrence>
+     */
+    public function findFutureEventAbsoluteOccurrencesByEventId(
+        NodeAggregateIdentifier $eventId,
+        DateTimeSpecification $referenceDate,
         \DateTimeZone $timeZone,
+    ): iterable {
+        $utcReferenceDate = $referenceDate->toDateTime($timeZone)->setTimezone(new \DateTimeZone('UTC'));
+        /** @var array<int,DatabaseRow> $rows */
+        $rows = $this->databaseConnection->executeQuery(
+            'SELECT * FROM ' . self::TABLE_NAME
+            . ' WHERE event_id = :eventId AND start_date_utc > :referenceDate',
+            [
+                'eventId' => (string)$eventId,
+                'referenceDate' => $utcReferenceDate->format(self::DATE_FORMAT),
+            ]
+        )->fetchAllAssociative();
+
+        foreach ($rows as $row) {
+            yield $this->mapDatabaseRowToEventAbsoluteOccurrence($row, $timeZone);
+        }
+    }
+
+    /**
+     * @return iterable<int,EventOccurrence>
+     */
+    public function findFutureEventLocalOccurrencesByEventId(
+        NodeAggregateIdentifier $eventId,
+        DateTimeSpecification $referenceDate,
     ): iterable {
         /** @var array<int,DatabaseRow> $rows */
         $rows = $this->databaseConnection->executeQuery(
@@ -99,7 +176,7 @@ final class EventOccurrenceRepository
         )->fetchAllAssociative();
 
         foreach ($rows as $row) {
-            yield $this->mapDatabaseRowToEventOccurrence($row, $timeZone);
+            yield $this->mapDatabaseRowToEventLocalOccurrence($row);
         }
     }
 
@@ -113,7 +190,7 @@ final class EventOccurrenceRepository
         );
     }
 
-    public function removeAllFutureOccurrencesByEventId(NodeAggregateIdentifier $eventId, \DateTimeImmutable $referenceDate): void
+    public function removeAllFutureOccurrencesByEventId(NodeAggregateIdentifier $eventId, DateTimeSpecification $referenceDate): void
     {
         $this->databaseConnection->executeStatement(
             'DELETE FROM ' . self::TABLE_NAME . ' WHERE event_id = :eventId AND end_date > :referenceDate',
@@ -141,6 +218,8 @@ final class EventOccurrenceRepository
                         'event_id' => (string)$eventId,
                         'start_date' => $date->startDate->format(self::DATE_FORMAT),
                         'end_date' => $date->endDate->format(self::DATE_FORMAT),
+                        'start_date_utc' => $date->startDate->setTimezone(new \DateTimeZone('UTC'))->format(self::DATE_FORMAT),
+                        'end_date_utc' => $date->endDate->setTimezone(new \DateTimeZone('UTC'))->format(self::DATE_FORMAT),
                     ]
                 );
             }
@@ -152,12 +231,12 @@ final class EventOccurrenceRepository
         NodeAggregateIdentifier $calendarId,
         EventOccurrenceSpecification $occurrenceSpecification,
         \DateTimeImmutable $referenceDate,
-        \DateTimeZone $locationTimezone,
+        \DateTimeZone $locationTimeZone,
     ): void {
-        $this->databaseConnection->transactional(function () use ($eventId, $calendarId, $occurrenceSpecification, $referenceDate, $locationTimezone) {
-            $this->removeAllFutureOccurrencesByEventId($eventId, $referenceDate);
+        $this->databaseConnection->transactional(function () use ($eventId, $calendarId, $occurrenceSpecification, $referenceDate, $locationTimeZone) {
+            $this->removeAllFutureOccurrencesByEventId($eventId, DateTimeSpecification::fromDateTimeIgnoringTimeZone($referenceDate->setTimezone($locationTimeZone)));
 
-            foreach ($occurrenceSpecification->resolveDates($referenceDate, null, $locationTimezone) as $futureDate) {
+            foreach ($occurrenceSpecification->resolveDates($referenceDate, null, $locationTimeZone) as $futureDate) {
                 $this->databaseConnection->insert(
                     self::TABLE_NAME,
                     [
@@ -165,6 +244,8 @@ final class EventOccurrenceRepository
                         'event_id' => (string)$eventId,
                         'start_date' => $futureDate->startDate->format(self::DATE_FORMAT),
                         'end_date' => $futureDate->endDate->format(self::DATE_FORMAT),
+                        'start_date_utc' => $futureDate->startDate->setTimezone(new \DateTimeZone('UTC'))->format(self::DATE_FORMAT),
+                        'end_date_utc' => $futureDate->endDate->setTimezone(new \DateTimeZone('UTC'))->format(self::DATE_FORMAT),
                     ]
                 );
             }
@@ -213,6 +294,8 @@ final class EventOccurrenceRepository
                                     'event_id' => $eventId,
                                     'start_date' => $date->startDate->format(self::DATE_FORMAT),
                                     'end_date' => $date->endDate->format(self::DATE_FORMAT),
+                                    'start_date_utc' => $date->startDate->setTimezone(new \DateTimeZone('UTC'))->format(self::DATE_FORMAT),
+                                    'end_date_utc' => $date->endDate->setTimezone(new \DateTimeZone('UTC'))->format(self::DATE_FORMAT),
                                 ]
                             );
                         }
@@ -233,9 +316,9 @@ final class EventOccurrenceRepository
             if ($calendarCandidate->getNodeType()->isOfType('Sitegeist.GroundhogDay:Mixin.Calendar')) {
                 return NodeAggregateIdentifier::fromString($calendarCandidate->getIdentifier());
             }
-            $calendarCandidate = $this->nodeDataRepository->findOneByPath($eventNodeData->getParentPath(), $eventNodeData->getWorkspace());
+            $calendarCandidate = $this->nodeDataRepository->findOneByPath($calendarCandidate->getParentPath(), $eventNodeData->getWorkspace());
         }
-        throw CalendarIsMissing::butWasRequired(NodeAggregateIdentifier::fromString($eventNodeData->getParentPath()));
+        throw CalendarIsMissing::butWasRequired(NodeAggregateIdentifier::fromString($eventNodeData->getIdentifier()));
     }
 
     /**
@@ -247,31 +330,50 @@ final class EventOccurrenceRepository
         $locationCandidate = $eventNodeData;
         while ($locationCandidate) {
             if ($locationCandidate->getNodeType()->isOfType('Sitegeist.GroundhogDay:Mixin.Location')) {
-                return $locationCandidate->getProperty('timezone') ?: new \DateTimeZone('UTC');
+                return $locationCandidate->getProperty('timeZone') ?: new \DateTimeZone('UTC');
             }
-            $locationCandidate = $this->nodeDataRepository->findOneByPath($eventNodeData->getParentPath(), $eventNodeData->getWorkspace());
+            $locationCandidate = $this->nodeDataRepository->findOneByPath($locationCandidate->getParentPath(), $eventNodeData->getWorkspace());
         }
-        throw CalendarIsMissing::butWasRequired(NodeAggregateIdentifier::fromString($eventNodeData->getParentPath()));
+        throw LocationIsMissing::butWasRequired(NodeAggregateIdentifier::fromString($eventNodeData->getIdentifier()));
     }
 
     /**
      * @param DatabaseRow $row
      */
-    private function mapDatabaseRowToEventOccurrence(array $row, \DateTimeZone $timeZone): EventOccurrence
+    private function mapDatabaseRowToEventAbsoluteOccurrence(array $row, \DateTimeZone $timeZone): EventOccurrence
     {
         return new EventOccurrence(
             NodeAggregateIdentifier::fromString($row['event_id']),
-            self::createUTCDate($row['start_date'], $timeZone),
-            self::createUTCDate($row['end_date'], $timeZone),
+            self::createAbsoluteDateSpecification($row['start_date_utc'], $timeZone),
+            self::createAbsoluteDateSpecification($row['end_date_utc'], $timeZone),
         );
     }
 
-    private static function createUTCDate(string $dateString, \DateTimeZone $timeZone): \DateTimeImmutable
+    /**
+     * @param DatabaseRow $row
+     */
+    private function mapDatabaseRowToEventLocalOccurrence(array $row): EventOccurrence
     {
-        /** @var \DateTimeImmutable $result */
-        $result = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $dateString, new \DateTimeZone('UTC'));
-        $result = $result->setTimezone($timeZone);
+        return new EventOccurrence(
+            NodeAggregateIdentifier::fromString($row['event_id']),
+            self::createLocalDateSpecification($row['start_date']),
+            self::createLocalDateSpecification($row['end_date']),
+        );
+    }
 
-        return $result;
+    private static function createLocalDateSpecification(string $dateString): DateTimeSpecification
+    {
+        $dateTime = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $dateString, new \DateTimeZone('UTC'));
+        assert($dateTime instanceof \DateTimeImmutable);
+
+        return DateTimeSpecification::fromDateTimeIgnoringTimeZone($dateTime);
+    }
+
+    private static function createAbsoluteDateSpecification(string $dateString, \DateTimeZone $timeZone): DateTimeSpecification
+    {
+        $dateTime = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $dateString, new \DateTimeZone('UTC'));
+        assert($dateTime instanceof \DateTimeImmutable);
+
+        return DateTimeSpecification::fromDateTimeIgnoringTimeZone($dateTime->setTimezone($timeZone));
     }
 }

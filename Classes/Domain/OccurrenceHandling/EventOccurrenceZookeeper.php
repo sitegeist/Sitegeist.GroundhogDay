@@ -40,7 +40,7 @@ final class EventOccurrenceZookeeper
             calendarId: $event->calendarId,
             occurrenceSpecification: $event->occurrenceSpecification,
             referenceDate: $event->dateOfChange,
-            locationTimezone: $event->locationTimezone,
+            locationTimeZone: $event->locationTimezone,
         );
     }
 

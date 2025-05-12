@@ -12,15 +12,15 @@ final readonly class EventOccurrence
 {
     public function __construct(
         public NodeAggregateIdentifier $eventId,
-        public \DateTimeImmutable $startDate,
-        public \DateTimeImmutable $endDate,
+        public DateTimeSpecification $startDate,
+        public DateTimeSpecification $endDate,
     ) {
     }
 
     public static function create(
         NodeAggregateIdentifier $eventId,
-        \DateTimeImmutable $startDate,
-        \DateTimeImmutable $endDate,
+        DateTimeSpecification $startDate,
+        DateTimeSpecification $endDate,
     ): self {
         return new self($eventId, $startDate, $endDate);
     }

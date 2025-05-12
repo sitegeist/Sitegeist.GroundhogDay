@@ -150,11 +150,11 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable
     public function resolveDates(?\DateTimeImmutable $afterDate, ?\DateInterval $recurrenceInterval, \DateTimeZone $locationTimezone): array
     {
         $dates = [];
-        if (!$afterDate || $this->startDate >= $afterDate) {
-            $startDate = $this->startDate->toDateTime($locationTimezone);
-            $dates[$startDate->format(self::DATE_FORMAT)] = new EventDates(
-                $startDate,
-                $this->resolveEndDate($locationTimezone) ?: $startDate,
+        $startDateTime = $this->startDate->toDateTime($locationTimezone);
+        if (!$afterDate || $startDateTime >= $afterDate) {
+            $dates[$startDateTime->format(self::DATE_FORMAT)] = new EventDates(
+                $startDateTime,
+                $this->resolveEndDate($locationTimezone) ?: $startDateTime,
             );
         }
 

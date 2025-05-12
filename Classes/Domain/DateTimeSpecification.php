@@ -71,6 +71,19 @@ final readonly class DateTimeSpecification implements \JsonSerializable, \String
             ->format($format);
     }
 
+    public function advanceBy(\DateInterval $interval, \DateTimeZone $timeZone): self
+    {
+        return self::fromDateTimeIgnoringTimeZone(
+            $this->toDateTime($timeZone)
+                ->add($interval)
+        );
+    }
+
+    public function setBackToMidnight(): self
+    {
+        return new self(\mb_substr($this->value, 0, -6) . '000000');
+    }
+
     public function jsonSerialize(): string
     {
         return $this->toString();

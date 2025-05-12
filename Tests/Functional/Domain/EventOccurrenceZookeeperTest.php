@@ -1164,6 +1164,90 @@ final class EventOccurrenceZookeeperTest extends FunctionalTestCase
      */
     public static function eventOccurrenceSpecificationChangeProvider(): iterable
     {
+        yield 'single-day daily event, changed start date' => [
+            'previousStateEvent' => EventWasCreated::create(
+                eventId: NodeAggregateIdentifier::fromString('my-event'),
+                calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
+                occurrenceSpecification: EventOccurrenceSpecification::create(
+                    startDate: DateTimeSpecification::fromString('20250424T143000'),
+                ),
+                locationTimezone: new \DateTimeZone('Europe/Berlin'),
+            ),
+            'event' => EventOccurrenceSpecificationWasChanged::create(
+                eventId: NodeAggregateIdentifier::fromString('my-event'),
+                calendarId: NodeAggregateIdentifier::fromString('my-calendar'),
+                occurrenceSpecification: EventOccurrenceSpecification::create(
+                    startDate: DateTimeSpecification::fromString('20250424T150000'),
+                ),
+                dateOfChange: self::createDateTime('2025-04-24 14:00:00', new \DateTimeZone('Europe/Berlin')),
+                locationTimezone: new \DateTimeZone('Europe/Berlin'),
+            ),
+            'expectedEventAbsoluteOccurrencesWithinPeriod' => [
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTimeSpecification('2025-04-17 00:00:00'),
+                    'endDate' => self::createDateTimeSpecification('2025-04-23 23:59:59'),
+                    'occurrences' => EventOccurrences::create(),
+                ],
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTimeSpecification('2025-04-18 00:00:00'),
+                    'endDate' => self::createDateTimeSpecification('2025-04-24 23:59:59'),
+                    'occurrences' => EventOccurrences::create(
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTimeSpecification('2025-04-24 13:00:00'),
+                            self::createDateTimeSpecification('2025-04-24 13:00:00'),
+                        ),
+                    ),
+                ],
+            ],
+            'expectedEventLocalOccurrencesWithinPeriod' => [
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTimeSpecification('2025-04-17 00:00:00'),
+                    'endDate' => self::createDateTimeSpecification('2025-04-23 23:59:59'),
+                    'occurrences' => EventOccurrences::create(),
+                ],
+                [
+                    'calendarId' => NodeAggregateIdentifier::fromString('my-calendar'),
+                    'startDate' => self::createDateTimeSpecification('2025-04-18 00:00:00'),
+                    'endDate' => self::createDateTimeSpecification('2025-04-24 23:59:59'),
+                    'occurrences' => EventOccurrences::create(
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTimeSpecification('2025-04-24 15:00:00'),
+                            self::createDateTimeSpecification('2025-04-24 15:00:00'),
+                        ),
+                    ),
+                ],
+            ],
+            'expectedEventAbsoluteOccurrencesByEventId' => [
+                [
+                    'eventId' => NodeAggregateIdentifier::fromString('my-event'),
+                    'occurrences' => EventOccurrences::create(
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTimeSpecification('2025-04-24 13:00:00'),
+                            self::createDateTimeSpecification('2025-04-24 13:00:00'),
+                        ),
+                    )
+                ]
+            ],
+            'expectedEventLocalOccurrencesByEventId' => [
+                [
+                    'eventId' => NodeAggregateIdentifier::fromString('my-event'),
+                    'occurrences' => EventOccurrences::create(
+                        EventOccurrence::create(
+                            NodeAggregateIdentifier::fromString('my-event'),
+                            self::createDateTimeSpecification('2025-04-24 15:00:00'),
+                            self::createDateTimeSpecification('2025-04-24 15:00:00'),
+                        ),
+                    )
+                ]
+            ],
+        ];
+
         yield 'single-day daily event, changed recurrence rule' => [
             'previousStateEvent' => EventWasCreated::create(
                 eventId: NodeAggregateIdentifier::fromString('my-event'),

@@ -6,8 +6,8 @@
                 <source>Location</source>
                 <target state="translated">Veranstaltungsort</target>
             </trans-unit>
-            <trans-unit id="properties.timezone" xml:space="preserve" approved="yes">
-                <source>Timezone</source>
+            <trans-unit id="properties.timeZone" xml:space="preserve" approved="yes">
+                <source>Time zone</source>
                 <target state="translated">Zeitzone</target>
             </trans-unit>
         </body>

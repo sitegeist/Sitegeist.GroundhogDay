@@ -5,8 +5,8 @@
             <trans-unit id="groups.location" xml:space="preserve" approved="yes">
                 <source>Location</source>
             </trans-unit>
-            <trans-unit id="properties.timezone" xml:space="preserve" approved="yes">
-                <source>Timezone</source>
+            <trans-unit id="properties.timeZone" xml:space="preserve" approved="yes">
+                <source>Time zone</source>
             </trans-unit>
         </body>
     </file>

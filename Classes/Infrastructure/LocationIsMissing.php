@@ -10,7 +10,7 @@ final class LocationIsMissing extends \RuntimeException
 {
     public static function butWasRequired(NodeAggregateIdentifier $eventId): self
     {
-        return new self('Failed to resolve location timezone for event '
+        return new self('Failed to resolve location time zone for event '
             . $eventId . ', one of its ancestors must be a location',
             1746795172
         );

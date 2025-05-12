@@ -118,7 +118,7 @@ class EventRelay
         $locationCandidate = $event;
         while ($locationCandidate) {
             if ($locationCandidate->getNodeType()->isOfType('Sitegeist.GroundhogDay:Mixin.Location')) {
-                return $locationCandidate->getProperty('timezone') ?: new \DateTimeZone('UTC');
+                return $locationCandidate->getProperty('timeZone') ?: new \DateTimeZone('UTC');
             }
             try {
                 $locationCandidate = $locationCandidate->findParentNode();

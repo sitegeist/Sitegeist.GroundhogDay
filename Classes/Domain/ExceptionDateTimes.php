@@ -62,12 +62,12 @@ final readonly class ExceptionDateTimes implements \JsonSerializable, \IteratorA
         yield from $this->items;
     }
 
-    /**
-     * @return array<int,DateTimeSpecification>
-     */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): string
     {
-        return $this->items;
+        return 'EXDATE:' . implode(',', array_map(
+            fn (DateTimeSpecification $date): string => $date->value,
+            $this->items
+        ));
     }
 
     public function toString(\DateTimeZone $locationTimezone): string

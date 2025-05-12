@@ -62,12 +62,12 @@ final readonly class RecurrenceDateTimes implements \JsonSerializable, \Iterator
         yield from $this->items;
     }
 
-    /**
-     * @return array<int,DateTimeSpecification>
-     */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): string
     {
-        return $this->items;
+        return 'RDATE:' . implode(',', array_map(
+            fn (DateTimeSpecification $date): string => $date->value,
+            $this->items
+        ));
     }
 
     public function toString(\DateTimeZone $locationTimezone): string

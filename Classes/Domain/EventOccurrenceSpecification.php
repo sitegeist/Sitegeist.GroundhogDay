@@ -195,13 +195,16 @@ final readonly class EventOccurrenceSpecification implements \JsonSerializable
         if ($this->recurrenceRule !== null) {
             $referenceDate = $afterDate ?: $this->startDate->toDateTime($locationTimezone);
             $renderer = new ArrayTransformer();
-            $rule = new Rule($this->recurrenceRule->value, $this->startDate->toDateTime($locationTimezone), $this->resolveEndDate($locationTimezone));
+            $rule = new Rule(
+                rrule: $this->recurrenceRule->value,
+                startDate: $this->startDate->toDateTime($locationTimezone),
+                endDate: $this->resolveEndDate($locationTimezone)
+            );
+
             foreach (
                 $renderer->transform(
                     $rule,
-                    $rule->getEndDate()
-                        ? null
-                        : new BeforeConstraint($referenceDate->add($recurrenceInterval ?: new \DateInterval('P1Y')))
+                    new BeforeConstraint($referenceDate->add($recurrenceInterval ?: new \DateInterval('P1Y')))
                 ) as $recurrence
             ) {
                 $eventDates = EventDates::tryFromRecurrence($recurrence);

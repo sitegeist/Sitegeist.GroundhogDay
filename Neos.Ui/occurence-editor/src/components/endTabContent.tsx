@@ -52,6 +52,7 @@ export const EndTabContent: React.FC<RRuleEditorComponentProps> = ({ rrule, onCh
                     theme={{
                         'selectTodayBtn': 'select-tdy-btn',
                     }}
+                    timeConstraints={{ minutes: { step: 1 } }}
                     is24Hour
                     value={rrule.options.until ?? undefined}
                     labelFormat="DD. MMMM YYYY HH:mm"

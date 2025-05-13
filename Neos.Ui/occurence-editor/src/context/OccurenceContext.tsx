@@ -36,6 +36,10 @@ export const OccurenceProvider = (
 
     useEffect(() => {
         setOccurence(convertToOccurenceState(value));
+
+        if (!value.startDate) {
+            onCommit(convertToOccurenceState(value))
+        }
     }, [value, setOccurence]);
 
     const setStartDate = (startDate: Date) => {

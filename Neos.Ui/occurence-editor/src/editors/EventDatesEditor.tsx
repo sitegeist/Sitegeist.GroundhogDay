@@ -41,6 +41,7 @@ export const EventDatesEditor = () => {
                     'selectTodayBtn': 'select-tdy-btn',
                     'closeCalendarIconBtn': 'hide-date-reset-button'
                 }}
+                timeConstraints={{ minutes: { step: 1 } }}
                 is24Hour
                 value={occurence.startDate ?? undefined}
                 labelFormat="DD. MMM YYYY, HH:mm"
@@ -56,6 +57,7 @@ export const EventDatesEditor = () => {
 
             {eventEndType === 'endDate' ? (
                 <DateInput
+                    timeConstraints={{ minutes: { step: 1 } }}
                     theme={{ 'selectTodayBtn': 'select-tdy-btn' }}
                     is24Hour
                     value={occurence.endDate ?? undefined}

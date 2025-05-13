@@ -66,11 +66,13 @@ export const OcurrenceEditor = ({options, highlight}: OccurenceEditorProps) => {
             <MultiDateInput
                 value={occurence.exceptionDateTimes}
                 onChange={setExceptionDates}
+                initialDate={occurence.startDate}
             />
             <Label>{i18n('Sitegeist.GroundhogDay:NodeTypes.Mixin.Event:inspector.manual')}</Label>
             <MultiDateInput
                 value={occurence.recurrenceDateTimes}
                 onChange={setRecurrencDates}
+                initialDate={occurence.startDate}
             />
         </EditorContainer>
     )

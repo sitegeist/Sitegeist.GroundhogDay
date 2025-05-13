@@ -7,10 +7,11 @@ import { Container } from './components/container';
 type MultiDateInputProps = {
     value?: (Date | null)[];
     onChange?: (dates: (Date | null)[]) => void;
+    initialDate?: Date;
 };
 
 
-export const MultiDateInput = ({ value, onChange }: MultiDateInputProps) => {
+export const MultiDateInput = ({ value, onChange, initialDate }: MultiDateInputProps) => {
     const [dates, setDates] = useState<(Date | null)[]>(value ?? [])
     const [addingNewIndex, setAddingNewIndex] = useState<number | null>(null);
     const i18n = useI18n();
@@ -38,7 +39,7 @@ export const MultiDateInput = ({ value, onChange }: MultiDateInputProps) => {
     };
 
     const handleAddNew = () => {
-        const updated = [...dates, new Date()];
+        const updated = [...dates, initialDate ?? new Date()];
         setDates(updated);
         setAddingNewIndex(dates.length);
         onChange?.(updated);
@@ -49,6 +50,7 @@ export const MultiDateInput = ({ value, onChange }: MultiDateInputProps) => {
             {dates.map((date, index) => (
                 <div key={index} className="mb-4">
                     <DateInput
+                        timeConstraints={{ minutes: { step: 1 } }}
                         value={date ?? undefined}
                         onChange={handleChange(index)}
                         is24Hour

@@ -6,8 +6,14 @@ import { deserializeExdatesFromString, deserializeRdatesFromString } from '../ut
 export function convertToOccurenceState(value: OccurenceCommitObject): OccurenceState {
     const { count, unit } = parseICalDuration(value?.duration);
 
+    const stripSeconds = (date: Date) => {
+        date.setSeconds(0);
+        date.setMilliseconds(0);
+        return date;
+    };
+
     return {
-        startDate: value?.startDate ? parseICalDate(value.startDate) : new Date,
+        startDate: value?.startDate ? parseICalDate(value.startDate) : stripSeconds(new Date),
         endDate: value?.endDate ? parseICalDate(value.endDate) : undefined,
         durationCount: count,
         durationUnit: unit,

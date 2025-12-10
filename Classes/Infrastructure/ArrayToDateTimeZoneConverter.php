@@ -29,7 +29,7 @@ class ArrayToDateTimeZoneConverter extends AbstractTypeConverter
     protected $priority = 1;
 
     /**
-     * @param string $source
+     * @param array{timezone?:string} $source
      * @param string $targetType,
      * @param array<mixed> $convertedChildProperties
      * @return ?\DateTimeZone
@@ -41,7 +41,11 @@ class ArrayToDateTimeZoneConverter extends AbstractTypeConverter
         ?PropertyMappingConfigurationInterface $configuration = null
     ) {
         try {
-            return new \DateTimeZone($source['timezone']);
+            if (array_key_exists('timezone', $source)) {
+                return new \DateTimeZone($source[ 'timezone' ]);
+            } else {
+                return null;
+            }
         } catch (\Exception) {
             return null;
         }

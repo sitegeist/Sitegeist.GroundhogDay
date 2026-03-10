@@ -6,3 +6,5 @@ node_modules
 composer.lock
 Packages
 vendor
+bin
+Build

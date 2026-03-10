@@ -18,6 +18,12 @@ composer require sitegeist/groundhogday
 
 ## Usage 
 
+### NodeTypes 
+
+- Sitegeist.GroundhogDay:Mixin.Calendar
+- Sitegeist.GroundhogDay:Mixin.Event 
+- Sitegeist.GroundhogDay:Mixin.Location
+
 # to be written
 
 ## Contributions

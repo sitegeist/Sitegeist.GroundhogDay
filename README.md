@@ -3,9 +3,13 @@
 > NodeTypes and PHP Tools for Events including recurrence rules 
 > based on RFC 5545 - iCalendar
 
+The package will calculate all future occurences for the next Year based on the contained nodeType mixins. 
+The PHP class `Sitegeist\GroundhogDay\Domain\EventOccurrenceRepository` can be used to fetch events 
+based on calendar, location and time-period.
+
 ## Authors & Sponsors
 
-* Bernhard Schmitt 
+* Bernhard Schmitt - schmitt@sitegeist.de
 
 _The development and the public-releases of this package is generously sponsored by our employer http://www.sitegeist.de._
 

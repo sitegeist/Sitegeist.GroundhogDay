@@ -28,7 +28,7 @@ class EventOccurrenceSpecificationTest extends TestCase
     }
 
     /**
-     * @return iterable<int,array{array: array<string,mixed>, expectedSpecification: EventOccurrenceSpecification}>
+     * @return iterable<string, array{array: array<string,mixed>, expectedSpecification: EventOccurrenceSpecification}>
      */
     public static function arrayProvider(): iterable
     {
@@ -115,6 +115,9 @@ class EventOccurrenceSpecificationTest extends TestCase
         );
     }
 
+    /**
+     * @return iterable<string, array{subject: EventOccurrenceSpecification, afterDate: ?\DateTimeImmutable, expectedEventDates: EventDates[] }>
+     */
     public static function resolvedDatesProvider(): iterable
     {
         yield 'only startDate, no afterDate' => [
@@ -349,6 +352,10 @@ class EventOccurrenceSpecificationTest extends TestCase
 
     private static function createDateTime(string $date): \DateTimeImmutable
     {
-        return \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $date, new \DateTimeZone('UTC'));
+        $date = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $date, new \DateTimeZone('UTC'));
+        if ($date instanceof \DateTimeImmutable) {
+            return $date;
+        }
+        throw new \Exception('invalid date string: "' . $date . '"');
     }
 }

@@ -40,4 +40,4 @@ jobs:
         run: composer lint
 
       - name: Stan
-        run: composer analyze
+        run: composer analyse

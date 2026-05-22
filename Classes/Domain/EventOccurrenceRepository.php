@@ -46,22 +46,31 @@ final class EventOccurrenceRepository
      * @return iterable<int,EventOccurrence>
      */
     public function findEventAbsoluteOccurrencesWithinPeriod(
-        NodeAggregateIdentifier $calendarId,
+        ?NodeAggregateIdentifier $calendarId,
         DateTimeSpecification $startDate,
         DateTimeSpecification $endDate,
         \DateTimeZone $timeZone,
     ): iterable {
         $utcStartDate = $startDate->toDateTime($timeZone)->setTimezone(new \DateTimeZone('UTC'));
         $utcEndDate = $endDate->toDateTime($timeZone)->setTimezone(new \DateTimeZone('UTC'));
+
+        $query = 'SELECT * FROM ' . self::TABLE_NAME
+            . ' WHERE start_date_utc <= :endDate AND end_date_utc >= :startDate';
+
+        $parameters = [
+            'startDate' => $utcStartDate->format(self::DATE_FORMAT),
+            'endDate' => $utcEndDate->format(self::DATE_FORMAT),
+        ];
+
+        if ($calendarId !== null) {
+            $query .= ' AND calendar_id = :calendarId';
+            $parameters['calendarId'] = (string)$calendarId;
+        }
+
         /** @var array<int,DatabaseRow> $rows */
         $rows = $this->databaseConnection->executeQuery(
-            'SELECT * FROM ' . self::TABLE_NAME
-             . ' WHERE calendar_id = :calendarId AND start_date_utc <= :endDate AND end_date_utc >= :startDate',
-            [
-                'calendarId' => (string)$calendarId,
-                'startDate' => $utcStartDate->format(self::DATE_FORMAT),
-                'endDate' => $utcEndDate->format(self::DATE_FORMAT),
-            ]
+            $query,
+            $parameters
         )->fetchAllAssociative();
 
         foreach ($rows as $row) {
@@ -73,19 +82,27 @@ final class EventOccurrenceRepository
      * @return iterable<int,EventOccurrence>
      */
     public function findEventLocalOccurrencesWithinPeriod(
-        NodeAggregateIdentifier $calendarId,
+        ?NodeAggregateIdentifier $calendarId,
         DateTimeSpecification $startDate,
         DateTimeSpecification $endDate,
     ): iterable {
+        $query = 'SELECT * FROM ' . self::TABLE_NAME
+            . ' WHERE start_date <= :endDate AND end_date >= :startDate';
+
+        $parameters = [
+            'startDate' => $startDate->format(self::DATE_FORMAT),
+            'endDate' => $endDate->format(self::DATE_FORMAT),
+        ];
+
+        if ($calendarId !== null) {
+            $query .= ' AND calendar_id = :calendarId';
+            $parameters['calendarId'] = (string)$calendarId;
+        }
+
         /** @var array<int,DatabaseRow> $rows */
         $rows = $this->databaseConnection->executeQuery(
-            'SELECT * FROM ' . self::TABLE_NAME
-             . ' WHERE calendar_id = :calendarId AND start_date <= :endDate AND end_date >= :startDate',
-            [
-                'calendarId' => (string)$calendarId,
-                'startDate' => $startDate->format(self::DATE_FORMAT),
-                'endDate' => $endDate->format(self::DATE_FORMAT),
-            ]
+            $query,
+            $parameters
         )->fetchAllAssociative();
 
         foreach ($rows as $row) {
